@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;overflow:hidden;background:#060810;font-family:'DM Sans',sans-serif}
+.canvas{width:1080px;height:1080px;position:relative;background:#060810}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,170,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,170,.04) 1px,transparent 1px);background-size:54px 54px}
+.glow{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(0,212,170,.12) 0%,transparent 65%);top:-100px;right:-100px;pointer-events:none}
+.glow2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(61,158,255,.08) 0%,transparent 65%);bottom:-100px;left:-100px}
+.content{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:90px}
+.logo-row{display:flex;align-items:center;gap:18px;margin-bottom:64px}
+.logo-hex{flex-shrink:0}
+.logo-name{font-family:'Big Shoulders Display',sans-serif;font-size:52px;font-weight:900;letter-spacing:6px;color:#fff}
+.tagline{font-size:22px;font-weight:300;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:72px}
+.headline{font-family:'Big Shoulders Display',sans-serif;font-size:92px;font-weight:900;line-height:.95;color:#fff;letter-spacing:-1px;margin-bottom:24px}
+.headline span{color:#00d4aa}
+.sub{font-size:20px;color:rgba(255,255,255,.5);font-weight:300;line-height:1.6;max-width:520px;margin-bottom:56px}
+.cta{display:inline-flex;align-items:center;gap:12px;background:#00d4aa;color:#000;font-size:18px;font-weight:700;padding:18px 36px;border-radius:8px;letter-spacing:1px}
+.sports{position:absolute;right:90px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:24px;align-items:center}
+.sport-icon{width:80px;height:80px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:36px}
+.url{position:absolute;bottom:56px;right:90px;font-size:16px;color:rgba(255,255,255,.25);letter-spacing:2px}
+.line{position:absolute;left:0;top:0;width:4px;height:100%;background:linear-gradient(180deg,transparent,#00d4aa,#3d9eff,transparent)}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="line"></div>
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <div class="glow2"></div>
+  <div class="content">
+    <div class="logo-row">
+      <svg class="logo-hex" width="52" height="52" viewBox="0 0 120 120">
+        <polygon points="60,8 104,33 104,83 60,108 16,83 16,33" fill="#00d4aa"/>
+        <line x1="60" y1="22" x2="60" y2="94" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+        <line x1="28" y1="40" x2="92" y2="76" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+        <line x1="92" y1="40" x2="28" y2="76" stroke="rgba(0,0,0,0.2)" stroke-width="2"/>
+        <text x="60" y="70" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="44" font-weight="900" fill="#000">T</text>
+      </svg>
+      <div class="logo-name">TACTIQ</div>
+    </div>
+    <div class="tagline">Videoanálisis táctico deportivo</div>
+    <div class="headline">CONOCÉ<br>EL JUEGO<br><span>EN PROFUNDIDAD</span></div>
+    <div class="sub">Análisis profesional con IA para hockey, fútbol y básquet. Informes detallados para tu cuerpo técnico.</div>
+    <div class="cta">Empezar ahora →</div>
+  </div>
+  <div class="sports">
+    <div class="sport-icon">🏑</div>
+    <div class="sport-icon">⚽</div>
+    <div class="sport-icon">🏀</div>
+  </div>
+  <div class="url">tactiq-analisis.netlify.app</div>
+</div>
+</body>
+</html>

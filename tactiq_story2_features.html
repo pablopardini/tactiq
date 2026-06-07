@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#060810;font-family:'DM Sans',sans-serif}
+.canvas{width:1080px;height:1920px;position:relative;background:#030608}
+.content{position:absolute;inset:0;display:flex;flex-direction:column;padding:80px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:100px}
+.logo-name{font-family:'Big Shoulders Display',sans-serif;font-size:42px;font-weight:900;letter-spacing:5px;color:#fff}
+.section-tag{font-size:16px;font-weight:600;color:#00d4aa;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px}
+.big{font-family:'Big Shoulders Display',sans-serif;font-size:100px;font-weight:900;line-height:.9;color:#fff;margin-bottom:60px;letter-spacing:-2px}
+.big span{color:#00d4aa}
+.feature-list{display:flex;flex-direction:column;gap:0;flex:1}
+.feat{padding:36px 0;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;gap:24px}
+.feat-num{font-family:'Big Shoulders Display',sans-serif;font-size:52px;font-weight:900;color:#00d4aa;opacity:.25;min-width:56px;line-height:1}
+.feat-body{}
+.feat-name{font-size:24px;font-weight:600;color:#fff;margin-bottom:8px}
+.feat-desc{font-size:17px;color:rgba(255,255,255,.4);font-weight:300;line-height:1.5}
+.bottom{padding-top:60px;display:flex;align-items:center;justify-content:space-between}
+.cta{background:#00d4aa;color:#000;font-size:18px;font-weight:700;padding:18px 40px;border-radius:10px;letter-spacing:1px}
+.url{font-size:15px;color:rgba(255,255,255,.2);letter-spacing:2px}
+.accent{position:absolute;top:0;right:0;width:6px;height:100%;background:linear-gradient(180deg,transparent,#00d4aa 40%,#3d9eff 70%,transparent)}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="accent"></div>
+  <svg style="position:absolute;right:80px;top:50%;transform:translateY(-50%);opacity:.04" width="400" height="400" viewBox="0 0 120 120">
+    <polygon points="60,4 108,31 108,84 60,111 12,84 12,31" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <polygon points="60,16 96,37 96,78 60,99 24,78 24,37" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <polygon points="60,28 84,43 84,72 60,87 36,72 36,43" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <text x="60" y="68" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="28" font-weight="900" fill="#00d4aa">T</text>
+  </svg>
+  <div class="content">
+    <div class="top">
+      <svg width="40" height="40" viewBox="0 0 120 120">
+        <polygon points="60,8 104,33 104,83 60,108 16,83 16,33" fill="#00d4aa"/>
+        <text x="60" y="70" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="44" font-weight="900" fill="#000">T</text>
+      </svg>
+      <div class="logo-name">TACTIQ</div>
+    </div>
+    <div class="section-tag">¿Qué incluye?</div>
+    <div class="big">TODO LO<br>QUE TU<br><span>EQUIPO</span><br>NECESITA</div>
+    <div class="feature-list">
+      <div class="feat">
+        <div class="feat-num">01</div>
+        <div class="feat-body">
+          <div class="feat-name">Registro de eventos en vivo</div>
+          <div class="feat-desc">Cada acción del partido categorizada en tiempo real mientras el video corre</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-num">02</div>
+        <div class="feat-body">
+          <div class="feat-name">Análisis con inteligencia artificial</div>
+          <div class="feat-desc">Detección automática de patrones y recomendaciones tácticas</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-num">03</div>
+        <div class="feat-body">
+          <div class="feat-name">Heatmap de zonas</div>
+          <div class="feat-desc">Mapa de calor visual con las zonas más activas del partido</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-num">04</div>
+        <div class="feat-body">
+          <div class="feat-name">Informe PDF profesional</div>
+          <div class="feat-desc">Documento listo para presentar al cuerpo técnico y la comisión</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <div class="cta">Ver más →</div>
+      <div class="url">tactiq-analisis.netlify.app</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;overflow:hidden;background:#060810;font-family:'DM Sans',sans-serif}
+.canvas{width:1080px;height:1080px;position:relative;background:#060810;display:flex;align-items:center;justify-content:center}
+.field{position:absolute;inset:0;opacity:.06}
+.quote-wrap{position:relative;z-index:2;text-align:center;padding:80px}
+.open-quote{font-size:180px;font-family:'Big Shoulders Display',sans-serif;font-weight:900;color:#00d4aa;line-height:.7;opacity:.4;margin-bottom:20px}
+.quote{font-family:'Big Shoulders Display',sans-serif;font-size:64px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:40px;letter-spacing:-0.5px}
+.quote span{color:#00d4aa}
+.author{font-size:18px;color:rgba(255,255,255,.4);font-weight:300;letter-spacing:3px;text-transform:uppercase;margin-bottom:60px}
+.divider{width:60px;height:2px;background:#00d4aa;margin:0 auto 60px}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:14px}
+.logo-name{font-family:'Big Shoulders Display',sans-serif;font-size:32px;font-weight:900;letter-spacing:4px;color:rgba(255,255,255,.6)}
+.corner-tl,.corner-br{position:absolute;width:100px;height:100px;opacity:.3}
+.corner-tl{top:40px;left:40px;border-top:2px solid #00d4aa;border-left:2px solid #00d4aa}
+.corner-br{bottom:40px;right:40px;border-bottom:2px solid #00d4aa;border-right:2px solid #00d4aa}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <svg class="field" viewBox="0 0 1080 1080" style="position:absolute;inset:0;width:100%;height:100%">
+    <rect x="140" y="140" width="800" height="800" fill="none" stroke="#00d4aa" stroke-width="1.5"/>
+    <line x1="540" y1="140" x2="540" y2="940" stroke="#00d4aa" stroke-width="1"/>
+    <circle cx="540" cy="540" r="120" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <rect x="140" y="370" width="120" height="340" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <rect x="820" y="370" width="120" height="340" fill="none" stroke="#00d4aa" stroke-width="1"/>
+  </svg>
+  <div class="corner-tl"></div>
+  <div class="corner-br"></div>
+  <div class="quote-wrap">
+    <div class="open-quote">"</div>
+    <div class="quote">EL EQUIPO QUE<br>ANALIZA HOY<br><span>GANA MAÑANA</span></div>
+    <div class="divider"></div>
+    <div class="author">Inteligencia táctica deportiva</div>
+    <div class="logo-row">
+      <svg width="32" height="32" viewBox="0 0 120 120">
+        <polygon points="60,8 104,33 104,83 60,108 16,83 16,33" fill="#00d4aa"/>
+        <text x="60" y="70" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="44" font-weight="900" fill="#000">T</text>
+      </svg>
+      <div class="logo-name">TACTIQ</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

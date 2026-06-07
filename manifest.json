@@ -1,0 +1,27 @@
+{
+  "name": "Tactiq — Videoanálisis táctico",
+  "short_name": "Tactiq",
+  "description": "Videoanálisis táctico deportivo profesional",
+  "start_url": "./Tactiq.html",
+  "display": "standalone",
+  "background_color": "#060810",
+  "theme_color": "#00d4aa",
+  "orientation": "landscape-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23060810' rx='32'/><polygon points='96,16 164,54 164,130 96,168 28,130 28,54' fill='%2300d4aa'/><line x1='96' y1='34' x2='96' y2='150' stroke='rgba(0,0,0,0.2)' stroke-width='3'/><line x1='44' y1='62' x2='148' y2='122' stroke='rgba(0,0,0,0.2)' stroke-width='3'/><line x1='148' y1='62' x2='44' y2='122' stroke='rgba(0,0,0,0.2)' stroke-width='3'/><text x='96' y='116' text-anchor='middle' font-family='Arial Black' font-size='72' font-weight='900' fill='%23000'>T</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23060810' rx='80'/><polygon points='256,40 432,142 432,346 256,448 80,346 80,142' fill='%2300d4aa'/><line x1='256' y1='90' x2='256' y2='400' stroke='rgba(0,0,0,0.2)' stroke-width='6'/><line x1='112' y1='166' x2='400' y2='326' stroke='rgba(0,0,0,0.2)' stroke-width='6'/><line x1='400' y1='166' x2='112' y2='326' stroke='rgba(0,0,0,0.2)' stroke-width='6'/><text x='256' y='310' text-anchor='middle' font-family='Arial Black' font-size='200' font-weight='900' fill='%23000'>T</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "productivity"],
+  "lang": "es",
+  "dir": "ltr"
+}

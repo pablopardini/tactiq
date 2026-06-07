@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;overflow:hidden;background:#060810;font-family:'DM Sans',sans-serif}
+.canvas{width:1080px;height:1080px;position:relative;background:#030608}
+.bg-lines{position:absolute;inset:0}
+.content{position:absolute;inset:0;padding:80px;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:60px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-name{font-family:'Big Shoulders Display',sans-serif;font-size:36px;font-weight:900;letter-spacing:4px;color:#fff}
+.badge{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:#00d4aa;font-size:14px;font-weight:600;padding:8px 20px;border-radius:20px;letter-spacing:1px}
+.title{font-family:'Big Shoulders Display',sans-serif;font-size:68px;font-weight:900;color:#fff;line-height:1;margin-bottom:48px;letter-spacing:-1px}
+.title span{color:#00d4aa}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:28px 24px}
+.card-num{font-family:'Big Shoulders Display',sans-serif;font-size:52px;font-weight:900;line-height:1;margin-bottom:8px}
+.card-label{font-size:16px;color:rgba(255,255,255,.5);font-weight:300;line-height:1.4}
+.c1 .card-num{color:#00d4aa}
+.c2 .card-num{color:#3d9eff}
+.c3 .card-num{color:#bc8cff}
+.c4 .card-num{color:#ffc444}
+.url{text-align:right;font-size:15px;color:rgba(255,255,255,.2);margin-top:20px;letter-spacing:2px}
+.accent-line{position:absolute;top:0;left:80px;right:80px;height:2px;background:linear-gradient(90deg,transparent,#00d4aa,#3d9eff,transparent)}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="accent-line"></div>
+  <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.04" viewBox="0 0 1080 1080">
+    <circle cx="900" cy="180" r="300" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <circle cx="900" cy="180" r="200" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <circle cx="900" cy="180" r="100" fill="none" stroke="#00d4aa" stroke-width="1"/>
+  </svg>
+  <div class="content">
+    <div class="top">
+      <div class="logo">
+        <svg width="38" height="38" viewBox="0 0 120 120">
+          <polygon points="60,8 104,33 104,83 60,108 16,83 16,33" fill="#00d4aa"/>
+          <text x="60" y="70" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="44" font-weight="900" fill="#000">T</text>
+        </svg>
+        <div class="logo-name">TACTIQ</div>
+      </div>
+      <div class="badge">Análisis con IA</div>
+    </div>
+    <div class="title">TU EQUIPO<br>MERECE<br><span>DATOS REALES</span></div>
+    <div class="cards">
+      <div class="card c1">
+        <div class="card-num">100%</div>
+        <div class="card-label">Eventos registrados<br>en tiempo real</div>
+      </div>
+      <div class="card c2">
+        <div class="card-num">3</div>
+        <div class="card-label">Deportes soportados:<br>hockey, fútbol y básquet</div>
+      </div>
+      <div class="card c3">
+        <div class="card-num">IA</div>
+        <div class="card-label">Detección automática<br>de patrones tácticos</div>
+      </div>
+      <div class="card c4">
+        <div class="card-num">PDF</div>
+        <div class="card-label">Informes profesionales<br>para el cuerpo técnico</div>
+      </div>
+    </div>
+    <div class="url">tactiq-analisis.netlify.app</div>
+  </div>
+</div>
+</body>
+</html>

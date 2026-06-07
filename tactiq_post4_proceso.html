@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=DM+Sans:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;overflow:hidden;background:#060810;font-family:'DM Sans',sans-serif}
+.canvas{width:1080px;height:1080px;position:relative}
+.bg{position:absolute;inset:0;background:linear-gradient(135deg,#060810 0%,#0a1220 50%,#060810 100%)}
+.content{position:absolute;inset:0;padding:80px;display:flex;flex-direction:column;justify-content:space-between}
+.top{display:flex;align-items:center;gap:14px}
+.logo-name{font-family:'Big Shoulders Display',sans-serif;font-size:36px;font-weight:900;letter-spacing:4px;color:#fff}
+.middle{flex:1;display:flex;flex-direction:column;justify-content:center}
+.step-title{font-size:18px;font-weight:600;color:#00d4aa;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px}
+.big-title{font-family:'Big Shoulders Display',sans-serif;font-size:80px;font-weight:900;color:#fff;line-height:.95;margin-bottom:48px;letter-spacing:-1px}
+.steps{display:flex;flex-direction:column;gap:20px}
+.step{display:flex;align-items:center;gap:20px}
+.step-num{font-family:'Big Shoulders Display',sans-serif;font-size:42px;font-weight:900;color:#00d4aa;opacity:.3;min-width:50px}
+.step-content{}
+.step-name{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
+.step-desc{font-size:15px;color:rgba(255,255,255,.4);font-weight:300}
+.step-arrow{margin:0 8px;width:1px;height:24px;background:rgba(0,212,170,.2);position:relative;left:25px}
+.bottom{display:flex;align-items:center;justify-content:space-between}
+.bottom-cta{background:#00d4aa;color:#000;font-size:16px;font-weight:700;padding:16px 32px;border-radius:8px;letter-spacing:1px}
+.bottom-url{font-size:15px;color:rgba(255,255,255,.2);letter-spacing:2px}
+.deco{position:absolute;right:80px;top:50%;transform:translateY(-50%);opacity:.06}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="bg"></div>
+  <svg class="deco" width="340" height="340" viewBox="0 0 120 120">
+    <polygon points="60,4 108,31 108,84 60,111 12,84 12,31" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <polygon points="60,16 96,37 96,78 60,99 24,78 24,37" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <polygon points="60,28 84,43 84,72 60,87 36,72 36,43" fill="none" stroke="#00d4aa" stroke-width="1"/>
+    <text x="60" y="68" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="28" font-weight="900" fill="#00d4aa">T</text>
+  </svg>
+  <div class="content">
+    <div class="top">
+      <svg width="36" height="36" viewBox="0 0 120 120">
+        <polygon points="60,8 104,33 104,83 60,108 16,83 16,33" fill="#00d4aa"/>
+        <text x="60" y="70" text-anchor="middle" font-family="Big Shoulders Display,sans-serif" font-size="44" font-weight="900" fill="#000">T</text>
+      </svg>
+      <div class="logo-name">TACTIQ</div>
+    </div>
+    <div class="middle">
+      <div class="step-title">¿Cómo funciona?</div>
+      <div class="big-title">SIMPLE.<br>RÁPIDO.<br>EFECTIVO.</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-name">Grabás el partido</div>
+            <div class="step-desc">Con cualquier cámara o celular</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-name">Lo enviás a tu analista</div>
+            <div class="step-desc">Por Drive, WhatsApp o como prefieras</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-name">Recibís el informe</div>
+            <div class="step-desc">Datos, heatmap, clips y análisis con IA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <div class="bottom-cta">Solicitar análisis →</div>
+      <div class="bottom-url">tactiq-analisis.netlify.app</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
