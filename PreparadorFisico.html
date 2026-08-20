@@ -1277,12 +1277,35 @@ function selectDeporte(id){
 }
 function openSportModal(){
   openModal(`
-    <div class="modal-head"><h3>Cambiar deporte</h3><button class="close-x" onclick="closeModal()">&times;</button></div>
-    <p class="hint" style="margin:-4px 0 14px;">Esto solo cambia las tablas de referencia de los tests. Las jugadoras y los datos cargados no se modifican.</p>
+    <div class="modal-head"><h3>Configuración del club</h3><button class="close-x" onclick="closeModal()">&times;</button></div>
+    <div class="field">
+      <label>Nombre del club (como se muestra arriba)</label>
+      <input id="editClubNombre" value="${esc(userProfile?.clubNombre || state.config.clubNombre || '')}" placeholder="Ej: Club Atlético Morteros">
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="guardarNombreClub()" style="margin-bottom:18px;">Guardar nombre</button>
+    <p class="hint" style="margin:-4px 0 14px;">Cambiar el deporte solo ajusta las tablas de referencia de los tests. Las jugadoras y los datos cargados no se modifican.</p>
     <div class="sport-grid" style="margin:0 auto;">
       ${DEPORTES.map(d=>`<button class="sport-card ${state.config.deporte===d.id?'sel':''}" onclick="selectDeporte('${d.id}')"><span class="ico">${d.ico}</span>${d.label}</button>`).join('')}
     </div>
   `);
+}
+
+async function guardarNombreClub(){
+  const nuevoNombre = document.getElementById('editClubNombre').value.trim();
+  if(!nuevoNombre){ showToast('Ingresá un nombre'); return; }
+  try{
+    if(userProfile){
+      userProfile.clubNombre = nuevoNombre;
+      if(currentUser){
+        await fbDb.collection('pf_usuarios').doc(currentUser.uid).update({ clubNombre: nuevoNombre });
+      }
+    } else {
+      state.config.clubNombre = nuevoNombre;
+      saveConfig();
+    }
+    updateTopbarTag();
+    showToast('Nombre actualizado');
+  }catch(e){ showToast('Error: '+e.message); }
 }
 
 /* ---------------- Navegación ---------------- */
