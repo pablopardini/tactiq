@@ -3589,36 +3589,41 @@ function openAddCategory(clubId,sportId){
   setTimeout(()=>document.getElementById('acName')?.focus(),100);
 }
 
-function saveNewCategory(clubId,sportId){
-  const club=S.clubs.find(c=>c.id===clubId);if(!club)return;
-  const sp=club.sports.find(s=>s.id===sportId);if(!sp)return;
-  const name=document.getElementById('acName').value.trim();
-  const username=document.getElementById('acUser').value.trim().toLowerCase().replace(/\s/g,'');
-  const password=document.getElementById('acPass').value;
-  if(!name){alert('Ingresá el nombre de la categoría');return;}
-  if(!username){alert('Ingresá un usuario');return;}
-  if(password.length<6){alert('La contraseña debe tener al menos 6 caracteres');return;}
-  if(S.users.find(u=>u.username===username)){alert('Ese usuario ya existe');return;}
-  const catId='cat_'+uid();
-  const userId=uid();
-  // Crear user en S.users para compatibilidad
-  const clubSport=SPORTS[sp.sport]?.label||sp.sport;
-  S.users.push({id:userId,username,password,role:'club',
-    club:`${club.name} — ${name}`,
-    sport:sp.sport,
-    clubEntityId:clubId,
-    sportId:sp.id,
-    categoryId:catId,
-    planningEnabled:false,
-    _migrated:true
-  });
-  sp.categories.push({id:catId,name,username,password,userId,planningEnabled:false});
-  persist();closeModal('mAddCat');
-  S.expandedGroups[club.id]=true;
-  S.expandedGroups[sp.id]=true;
-  renderClubsSidebar();
-  selectClub(userId);
-}
+   async function saveNewCategory(clubId,sportId){
+     const club=S.clubs.find(c=>c.id===clubId);if(!club)return;
+     const sp=club.sports.find(s=>s.id===sportId);if(!sp)return;
+     const name=document.getElementById('acName').value.trim();
+     const username=document.getElementById('acUser').value.trim().toLowerCase().replace(/\s/g,'');
+     const password=document.getElementById('acPass').value;
+     if(!name){alert('Ingresá el nombre de la categoría');return;}
+     if(!username){alert('Ingresá un usuario');return;}
+     if(password.length<6){alert('La contraseña debe tener al menos 6 caracteres');return;}
+     if(S.users.find(u=>u.username===username)){alert('Ese usuario ya existe');return;}
+     const catId='cat_'+uid();
+     const userId=uid();
+     try{
+       await createManagedUser(S.tenantId, username, password, 'category', catId);
+     }catch(err){
+       alert('No se pudo crear el acceso: '+err.message);
+       return;
+     }
+     const clubSport=SPORTS[sp.sport]?.label||sp.sport;
+     S.users.push({id:userId,username,password,role:'club',
+       club:`${club.name} — ${name}`,
+       sport:sp.sport,
+       clubEntityId:clubId,
+       sportId:sp.id,
+       categoryId:catId,
+       planningEnabled:false,
+       _migrated:true
+     });
+     sp.categories.push({id:catId,name,username,password,userId,planningEnabled:false});
+     persist();closeModal('mAddCat');
+     S.expandedGroups[club.id]=true;
+     S.expandedGroups[sp.id]=true;
+     renderClubsSidebar();
+     selectClub(userId);
+   }
 
 function selectClub(clubId){
   S.selectedClubId=clubId;
@@ -7838,7 +7843,7 @@ function openCreateTenant(){
   setTimeout(()=>document.getElementById('tnName')?.focus(),100);
 }
 
-function saveNewTenant(){
+async function saveNewTenant(){
   const name=document.getElementById('tnName')?.value.trim();
   const adminUser=document.getElementById('tnAdminUser')?.value.trim().toLowerCase().replace(/\s/g,'');
   const adminPass=document.getElementById('tnAdminPass')?.value;
@@ -7850,39 +7855,46 @@ function saveNewTenant(){
   const tenantId='tenant_'+uid();
   const expiresAt=expiryStr?new Date(expiryStr+'T23:59:59').getTime():null;
 
-  // 1. Verificar que el username no esté usado por otro tenant
-  db.ref('tactiq/tenantIndex/'+adminUser).once('value').then(snap=>{
-    if(snap.val()){
-      alert('Ese nombre de usuario ya está en uso por otro cliente. Elegí otro.');
-      return;
-    }
-    // 2. Crear el admin inicial dentro del nuevo tenant
-    const adminUserObj={id:uid(),username:adminUser,password:adminPass,role:'admin',club:'Analista (Admin)',isMain:true,createdAt:Date.now()};
-    const tenantData={
-      users:[],
-      clubs:[],
-      projects:[],
-      admins:[adminUserObj], // incluido en el mismo objeto — evita condición de carrera con otra escritura paralela
-      teams:[...DEFAULT_TEAMS],
-      divCategories:[...DEFAULT_CATS],
-      competitions:[...DEFAULT_COMPS],
-      updatedAt:Date.now()
-    };
-    Promise.all([
-      db.ref('tactiq/tenants/'+tenantId).set(tenantData), // un solo set() atómico con todo adentro, incluido admins
+  const snap = await db.ref('tactiq/tenantIndex/'+adminUser).once('value');
+  if(snap.val()){
+    alert('Ese nombre de usuario ya está en uso por otro cliente. Elegí otro.');
+    return;
+  }
+
+  const adminId=uid();
+  try{
+    await createManagedUser(tenantId, adminUser, adminPass, 'admin', adminId);
+  }catch(err){
+    alert('No se pudo crear el acceso del admin: '+err.message);
+    return;
+  }
+
+  const adminUserObj={id:adminId,username:adminUser,password:adminPass,role:'admin',club:'Analista (Admin)',isMain:true,createdAt:Date.now()};
+  const tenantData={
+    users:[],
+    clubs:[],
+    projects:[],
+    admins:[adminUserObj],
+    teams:[...DEFAULT_TEAMS],
+    divCategories:[...DEFAULT_CATS],
+    competitions:[...DEFAULT_COMPS],
+    updatedAt:Date.now()
+  };
+  try{
+    await Promise.all([
+      db.ref('tactiq/tenants/'+tenantId).set(tenantData),
       db.ref('tactiq/tenantIndex/'+adminUser).set(tenantId),
       db.ref('tactiq/tenantsIndex/'+tenantId).set({
         name,adminUsername:adminUser,active:true,
         createdAt:Date.now(),expiresAt:expiresAt||null
       })
-    ]).then(()=>{
-      closeModal('mCreateTenant');
-      loadTenantsList();
-      showEvToast('✅ Cliente "'+name+'" creado — admin: @'+adminUser,null,0);
-    }).catch(err=>{
-      alert('Error al crear el cliente: '+err.message);
-    });
-  });
+    ]);
+    closeModal('mCreateTenant');
+    loadTenantsList();
+    showEvToast('✅ Cliente "'+name+'" creado — admin: @'+adminUser,null,0);
+  }catch(err){
+    alert('Error al crear el cliente: '+err.message);
+  }
 }
 
 function toggleTenantActive(tenantId, currentlyActive){
@@ -8325,17 +8337,24 @@ function openAddAdmin(){
   setTimeout(()=>document.getElementById('newAdminUser')?.focus(),100);
 }
 
-function saveNewAdmin(){
-  const username=document.getElementById('newAdminUser')?.value.trim().toLowerCase().replace(/\s/g,'');
-  const password=document.getElementById('newAdminPass')?.value;
-  const email=document.getElementById('newAdminEmail')?.value.trim();
-  if(!username){alert('Ingresá un nombre de usuario.');return;}
-  if(!password||password.length<6){alert('La contraseña debe tener al menos 6 caracteres.');return;}
-  if(S.users.find(u=>u.username===username)){alert('Ese usuario ya existe. Elegí otro.');return;}
-  S.users.push({id:uid(),username,password,email:email||'',role:'admin',club:'Analista — '+username,isMain:false,createdAt:Date.now()});
-  persist();closeModal('mAddAdmin');renderAdminList();
-  showEvToast('✅ Analista @'+username+' creado — ya puede ingresar',null,0);
-}
+   async function saveNewAdmin(){
+     const username=document.getElementById('newAdminUser')?.value.trim().toLowerCase().replace(/\s/g,'');
+     const password=document.getElementById('newAdminPass')?.value;
+     const email=document.getElementById('newAdminEmail')?.value.trim();
+     if(!username){alert('Ingresá un nombre de usuario.');return;}
+     if(!password||password.length<6){alert('La contraseña debe tener al menos 6 caracteres.');return;}
+     if(S.users.find(u=>u.username===username)){alert('Ese usuario ya existe. Elegí otro.');return;}
+     const newId=uid();
+     try{
+       await createManagedUser(S.tenantId, username, password, 'admin', newId);
+     }catch(err){
+       alert('No se pudo crear el acceso: '+err.message);
+       return;
+     }
+     S.users.push({id:newId,username,password,email:email||'',role:'admin',club:'Analista — '+username,isMain:false,createdAt:Date.now()});
+     persist();closeModal('mAddAdmin');renderAdminList();
+     showEvToast('✅ Analista @'+username+' creado — ya puede ingresar',null,0);
+   }
 
 function editAdminUser(adminId){
   const admin=S.users.find(u=>u.id===adminId&&u.role==='admin');if(!admin)return;
@@ -12716,12 +12735,18 @@ function openRegRequests(){
   openModal('mRegRequests');
 }
 
-function approveRegRequest(reqId){
+async function approveRegRequest(reqId){
   const req=S.regRequests.find(r=>r.id===reqId);if(!req)return;
   if(S.users.find(u=>u.username===req.username)){
     alert('El usuario @'+req.username+' ya existe. Editá el nombre antes de aprobar.');return;
   }
   const newUserId=uid();
+        try{
+     await createManagedUser(S.tenantId, req.username, req.password, 'club', newUserId);
+   }catch(err){
+     alert('No se pudo crear el acceso: '+err.message);
+     return;
+   }
 
   if(req.tipo==='adicional'){
     // Usuario adicional — heredar del usuario madre
