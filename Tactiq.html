@@ -3500,7 +3500,7 @@ async function saveAdditionalUser(motherId){
     username,password,
     role:'club',
     club:mother.club,
-    sport:mother.sport,
+       sport:mother.sport||null,
     parentUserId:motherId,
     additionalUser:true,
     planningEnabled:mother.planningEnabled||false,
