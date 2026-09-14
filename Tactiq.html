@@ -3479,7 +3479,7 @@ function openAddAdditionalUser(motherId){
   setTimeout(()=>document.getElementById('adNombre')?.focus(),100);
 }
 
-function saveAdditionalUser(motherId){
+async function saveAdditionalUser(motherId){
   const mother=S.users.find(u=>u.id===motherId);if(!mother)return;
   const nombre=document.getElementById('adNombre')?.value.trim();
   const username=document.getElementById('adUser')?.value.trim().toLowerCase().replace(/\s/g,'');
@@ -3488,13 +3488,20 @@ function saveAdditionalUser(motherId){
   if(!username){alert('Ingresá un usuario.');return;}
   if(!password||password.length<6){alert('La contraseña debe tener al menos 6 caracteres.');return;}
   if(S.users.find(u=>u.username===username)){alert('Ese usuario ya existe. Elegí otro.');return;}
+  const newId=uid();
+  try{
+    await createManagedUser(S.tenantId, username, password, 'club', newId);
+  }catch(err){
+    alert('No se pudo crear el acceso: '+err.message);
+    return;
+  }
   const newUser={
-    id:uid(),
+    id:newId,
     username,password,
     role:'club',
-    club:mother.club,           // mismo club y categoría
+    club:mother.club,
     sport:mother.sport,
-    parentUserId:motherId,      // vínculo al usuario madre
+    parentUserId:motherId,
     additionalUser:true,
     planningEnabled:mother.planningEnabled||false,
     asistenciaEnabled:mother.asistenciaEnabled||false,
