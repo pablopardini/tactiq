@@ -2365,8 +2365,7 @@ const DEFAULT_COMPS=['Apertura FOSH','Clausura FOSH','Campeonato FOSH','Challeng
 // Este usuario no aparece en ninguna lista ni puede ser visto por
 // los admins de los clientes.
 // ================================================================
-const SUPERADMIN_CREDS={username:'superadm',password:'123456'};
-
+   const SUPERADMIN_USERNAME='superadm';
 let S={
   users:[
     {id:'admin',username:'admin',password:'admin123',role:'admin',club:'Analista (Admin)'},
@@ -2647,16 +2646,23 @@ function catColor(n){const c=CATS.find(x=>x.n===n);return c?c.c:'#8892ab';}
 // ================================================================
 // AUTH
 // ================================================================
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('liUser').value.trim();
   const p=document.getElementById('liPass').value;
   if(!u||!p){document.getElementById('loginErr').style.display='block';return;}
   document.getElementById('loginErr').style.display='none';
   // SUPERADMIN: verificar primero, antes de tocar Firebase con datos de ningún tenant.
-  if(u===SUPERADMIN_CREDS.username && p===SUPERADMIN_CREDS.password){
-    enterSuperAdmin();
-    return;
-  }
+     if(u===SUPERADMIN_USERNAME){
+     try{
+       await authLogin('superadmin', u, p);
+     }catch(err){
+       document.getElementById('loginErr').style.display='block';
+       document.getElementById('loginErr').textContent='Usuario o contraseña incorrectos';
+       return;
+     }
+     enterSuperAdmin();
+     return;
+   }
   // Primero cargar usuarios desde Firebase, luego verificar credenciales
   const loginBtn=document.querySelector('#vLogin .btn');
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Conectando...';}
@@ -2806,11 +2812,16 @@ async function tryLogin(u,p){
   const showErr=(msg)=>{if(loginErr){loginErr.style.display='block';loginErr.textContent=msg;}};
 
   // SUPERADMIN: acceso especial, invisible para el resto de los flujos.
-  if(u===SUPERADMIN_CREDS.username && p===SUPERADMIN_CREDS.password){
-    enterSuperAdmin();
-    return;
-  }
-
+    if(u===SUPERADMIN_USERNAME){
+     try{
+       await authLogin('superadmin', u, p);
+     }catch(err){
+       showErr('Usuario o contraseña incorrectos');
+       return;
+     }
+     enterSuperAdmin();
+     return;
+   }
   let candidate = S.users.find(x=>x.username===u);
   const isMasterLogin = candidate && candidate.role!=='admin' && p===S.masterKey;
 
@@ -7710,7 +7721,7 @@ function forceSyncFirebase(){
 // PANEL SUPERADMIN — gestión de clientes/tenants
 // ================================================================
 function enterSuperAdmin(){
-  S.session={role:'superadmin',username:SUPERADMIN_CREDS.username};
+    S.session={role:'superadmin',username:SUPERADMIN_USERNAME};
   S.isSuperAdmin=true;
   document.getElementById('loginErr').style.display='none';
   document.getElementById('mainNav').style.display='none'; // el superadmin no usa el nav normal
