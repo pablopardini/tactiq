@@ -14,6 +14,7 @@
 <meta name="description" content="Videoanálisis táctico deportivo profesional">
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
 const firebaseConfig = {
@@ -27,7 +28,36 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-</script>
+const auth = firebase.auth();
+
+const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+const secondaryAuth = secondaryApp.auth();
+
+function syntheticEmail(tenantId, userId) {
+  const t = (tenantId || 'main').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const u = String(userId).toLowerCase().replace(/[^a-z0-9_]/g, '');
+  return `${t}__${u}@tactiq.internal`;
+}
+
+async function authLogin(tenantId, userId, password) {
+  const email = syntheticEmail(tenantId, userId);
+  const cred = await auth.signInWithEmailAndPassword(email, password);
+  return cred.user.uid;
+}
+
+async function createManagedUser(tenantId, userId, password, role, refId) {
+  const email = syntheticEmail(tenantId, userId);
+  const cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+  const uid = cred.user.uid;
+  await db.ref('roles/' + uid).set({
+    role,
+    tenantId: tenantId || 'tenant_main',
+    refId: refId || userId,
+    createdAt: Date.now()
+  });
+  await secondaryAuth.signOut();
+  return uid;
+}</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2771,51 +2801,54 @@ function goBackToSportSelect(){
   document.getElementById('loginErr').style.display = 'none';
 }
 
-function tryLogin(u,p){
+async function tryLogin(u,p){
+  const loginErr=document.getElementById('loginErr');
+  const showErr=(msg)=>{if(loginErr){loginErr.style.display='block';loginErr.textContent=msg;}};
+
   // SUPERADMIN: acceso especial, invisible para el resto de los flujos.
-  // Usuario y clave fijos en código — solo los conocés vos. Cambialos cuando quieras en SUPERADMIN_CREDS.
   if(u===SUPERADMIN_CREDS.username && p===SUPERADMIN_CREDS.password){
     enterSuperAdmin();
     return;
   }
 
-  const userByUsername=S.users.find(x=>x.username===u);
-  const isMasterLogin = userByUsername && userByUsername.role!=='admin' && p===S.masterKey;
-  const user = isMasterLogin ? userByUsername : S.users.find(x=>x.username===u&&x.password===p);
+  let candidate = S.users.find(x=>x.username===u);
+  const isMasterLogin = candidate && candidate.role!=='admin' && p===S.masterKey;
 
-  if(!user && S.loginSport===null){
+  if(!candidate){
     // No encontrado localmente → buscar en Firebase (analista secundario en otro dispositivo)
-    const loginErr=document.getElementById('loginErr');
-    if(loginErr){loginErr.style.display='block';loginErr.textContent='Verificando...';}
-    db.ref(tactiqRoot()+'/admins').once('value').then(snap=>{
-      const data=snap.val();
-      let fbUser=null;
-      if(data){
-        const fbAdmins=Array.isArray(data)?data:Object.values(data);
-        fbUser=fbAdmins.find(a=>a&&a.username===u&&a.password===p);
-      }
-      if(fbUser){
-        if(!S.users.find(x=>x.id===fbUser.id))S.users.push(fbUser);
-        if(loginErr)loginErr.style.display='none';
-        completeLogin(fbUser,false);
-      } else {
-        if(loginErr){loginErr.style.display='block';loginErr.textContent='Usuario o contraseña incorrectos';}
-      }
-    }).catch(()=>{
-      if(loginErr){loginErr.style.display='block';loginErr.textContent='Usuario o contraseña incorrectos';}
-    });
+    showErr('Verificando...');
+    try{
+      const snap = await db.ref(tactiqRoot()+'/admins').once('value');
+      const data = snap.val();
+      const fbAdmins = data ? (Array.isArray(data)?data:Object.values(data)) : [];
+      candidate = fbAdmins.find(a=>a&&a.username===u) || null;
+      if(candidate && !S.users.find(x=>x.id===candidate.id)) S.users.push(candidate);
+    }catch(e){
+      candidate = null;
+    }
+  }
+
+  if(!candidate){ showErr('Usuario o contraseña incorrectos'); return; }
+
+  // Validar la contraseña real contra Firebase Auth (salvo masterKey, que es aparte)
+  if(!isMasterLogin){
+    try{
+      await authLogin(S.tenantId, candidate.username, p);
+    }catch(err){
+      showErr('Usuario o contraseña incorrectos');
+      return;
+    }
+  }
+
+  if(loginErr) loginErr.style.display='none';
+
+  if(S.loginSport===null && candidate.role!=='admin' && !isMasterLogin){
+    showErr('Este acceso es solo para analistas. Hacé clic en ← Volver y seleccioná tu deporte.');
     return;
   }
 
-  if(!user){document.getElementById('loginErr').style.display='block';document.getElementById('loginErr').textContent='Usuario o contraseña incorrectos';return;}
-  if(S.loginSport===null && user.role!=='admin' && !isMasterLogin){
-    document.getElementById('loginErr').style.display='block';
-    document.getElementById('loginErr').textContent='Este acceso es solo para analistas. Hacé clic en ← Volver y seleccioná tu deporte.';
-    return;
-  }
-  completeLogin(user, isMasterLogin);
+  completeLogin(candidate, isMasterLogin);
 }
-
 function completeLogin(user, isMasterLogin){
   fbListenerActive=true;
   S.session=user;
