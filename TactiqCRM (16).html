@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>TactiqCRM — Gestión de clientes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
+:root{
+  --bg:#eef2f6; --bg-panel:#ffffff; --bg-sidebar:#07182b; --bg-hover:#f1f6fa;
+  --line:#dbe3ec; --line-soft:#e7edf3;
+  --ink:#0c1d31; --ink2:#46596e; --ink3:#7a8fa5;
+  --brand:#00d4aa; --brand-ink:#04251f;
+  --accent:#087f69; --accent-soft:#e0f5ef; --accent-ink:#055a4a;
+  --gold:#b97708; --gold-soft:#fff3d6;
+  --red:#c43b32; --red-soft:#fdeceb;
+  --sidebar-text:#b4c4d6; --sidebar-text-dim:#7088a2; --sidebar-active:#0f2f4d;
+  --r:12px; --r2:20px;
+  --font-h:'Syne',sans-serif; --font-b:'Space Grotesk',sans-serif; --font-mono:'Space Grotesk',sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --honey:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='69.28' height='120' viewBox='0 0 69.28 120'%3E%3Cpath d='M0 20L34.64 0L69.28 20L69.28 60L34.64 80L0 60ZM34.64 80L34.64 120' fill='none' stroke='%2300d4aa' stroke-opacity='.09' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,.font-h{font-family:var(--font-h);letter-spacing:-.01em;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#c5d1de;border-radius:4px;}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+
+/* ============ LOGIN ============ */
+#loginView{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr;background:var(--bg-sidebar);}
+.login-art{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 40px;background-color:var(--bg-sidebar);background-image:var(--honey);color:#fff;}
+.login-art svg{width:min(500px,86%);height:auto;overflow:visible;}
+.login-claim{text-align:center;margin-top:18px;}
+.login-claim .t{font-family:var(--font-h);font-weight:800;font-size:40px;letter-spacing:-.02em;}
+.login-claim .s{margin:10px auto 0;max-width:30ch;font-size:17px;line-height:1.45;color:var(--sidebar-text);}
+.hx{fill-opacity:0;stroke-dasharray:1;stroke-dashoffset:1;stroke-width:3;animation:hexDraw 1.1s var(--ease) forwards,hexFill .6s ease forwards;}
+.hx.a{animation-delay:.1s,1s;} .hx.b{animation-delay:.35s,1.2s;} .hx.c{animation-delay:.6s,1.4s;}
+.hx-label{opacity:0;animation:fadeIn .6s ease 1.7s forwards;}
+.hx-group{animation:floatY 9s ease-in-out 2.4s infinite;}
+.login-side{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:32px;}
+.login-box{width:100%;max-width:370px;animation:fadeIn .7s ease .5s both;}
+.login-mark{display:none;}
+.login-title{font-family:var(--font-h);font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em;}
+.login-sub{color:var(--ink2);font-size:14px;margin-bottom:28px;margin-top:6px;}
+.field{margin-bottom:14px;}
+.field label{font-size:12.5px;font-weight:600;color:var(--ink2);display:block;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:var(--r);padding:11px 13px;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;font-family:var(--font-b);}
+.field input[type=file]{padding:8px 10px;font-size:13px;}
+.field input[type=file]::file-selector-button,input[type=file]::file-selector-button{border:none;background:var(--accent-soft);color:var(--accent-ink);font-weight:600;border-radius:8px;padding:7px 12px;margin-right:10px;cursor:pointer;font-family:var(--font-b);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:var(--r);padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .15s var(--ease),box-shadow .2s,background .15s,border-color .15s,color .15s;font-family:var(--font-b);white-space:nowrap;}
+.btn:active{transform:translateY(1px) scale(.985);}
+.btn-p{background:var(--accent);color:#fff;}
+.btn-p:hover{background:var(--accent-ink);transform:translateY(-1px);box-shadow:0 8px 20px -8px rgba(8,127,105,.7);}
+.btn-s{background:#fff;border:1px solid var(--line);color:var(--ink);}
+.btn-s:hover{border-color:var(--accent);color:var(--accent-ink);transform:translateY(-1px);}
+.btn-danger{background:var(--red-soft);border:1px solid #f3cdc9;color:var(--red);}
+.btn-danger:hover{background:#fadbd8;}
+.btn-block{width:100%;}
+.btn-xs{padding:6px 11px;font-size:11.5px;border-radius:9px;}
+.login-err{background:var(--red-soft);border:1px solid #f3cdc9;color:var(--red);border-radius:var(--r);padding:10px 13px;font-size:13px;margin-bottom:14px;display:none;animation:shake .35s ease;}
+
+/* ============ SHELL: SIDEBAR + MAIN ============ */
+#appView{display:none;min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:236px;flex-shrink:0;background-color:var(--bg-sidebar);background-image:var(--honey);color:var(--sidebar-text);display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh;}
+.sb-brand{display:flex;align-items:center;gap:11px;padding:4px 8px 26px;}
+.sb-brand .mark{width:34px;height:38px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--brand);display:flex;align-items:center;justify-content:center;color:var(--brand-ink);font-family:var(--font-h);font-weight:800;font-size:13px;flex-shrink:0;transition:transform .6s var(--ease);}
+.sb-brand:hover .mark{transform:rotate(60deg);}
+.sb-brand .name{font-family:var(--font-h);font-size:16px;font-weight:800;color:#fff;letter-spacing:-.01em;}
+.sb-nav{display:flex;flex-direction:column;gap:3px;}
+.sb-link{position:relative;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;background:none;border:none;color:var(--sidebar-text);font-size:13.5px;font-weight:500;cursor:pointer;text-align:left;font-family:var(--font-b);transition:background .18s,color .18s,transform .18s var(--ease);}
+.sb-link i{width:17px;text-align:center;font-size:13px;color:var(--sidebar-text-dim);transition:color .18s;}
+.sb-link:hover{background:rgba(255,255,255,.06);color:#fff;transform:translateX(2px);}
+.sb-link.active{background:var(--sidebar-active);color:#fff;font-weight:600;}
+.sb-link.active::before{content:'';position:absolute;left:-14px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:var(--brand);}
+.sb-link.active i{color:var(--brand);}
+.sb-spacer{flex:1;}
+.sb-sync{font-size:12px;color:var(--sidebar-text-dim);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .18s,color .18s;}
+.sb-sync:hover{background:rgba(255,255,255,.06);color:var(--sidebar-text);}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:#46607b;flex-shrink:0;}
+.sb-dot.on{background:var(--brand);box-shadow:0 0 0 0 rgba(0,212,170,.6);animation:pulse 2.4s infinite;}
+.sb-dot.err{background:#e5655b;}
+.sb-logout{margin-top:4px;font-size:12.5px;color:var(--sidebar-text-dim);background:none;border:none;padding:10px 12px;text-align:left;cursor:pointer;font-family:var(--font-b);border-radius:10px;transition:background .18s,color .18s;}
+.sb-logout:hover{background:rgba(255,255,255,.06);color:#fff;}
+
+.main{flex:1;min-width:0;padding:34px 44px 70px;max-width:1240px;}
+#viewDashboard,#viewClientes,#viewCobranzas{animation:viewIn .3s var(--ease);}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:12px;}
+.page-head .eyebrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink3);font-weight:500;margin-bottom:6px;}
+.page-head .eyebrow::before{content:'';width:11px;height:12px;background:var(--brand);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);}
+.page-head h1{font-size:32px;font-weight:800;color:var(--ink);letter-spacing:-.025em;line-height:1.1;}
+.page-head .sub{font-size:13px;color:var(--ink3);margin-top:5px;}
+
+/* ============ KPIs: una franja con divisores, y un número protagonista ============ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;margin-bottom:32px;}
+.kpi{background:var(--bg-panel);padding:20px 22px;transition:background .2s;}
+.kpi:hover{background:var(--bg-hover);}
+.kpi .num{font-family:var(--font-h);font-size:28px;font-weight:800;line-height:1.05;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.kpi .lbl{font-size:12.5px;color:var(--ink3);margin-top:8px;font-weight:500;}
+.kpi.accent .num{color:var(--accent);}
+.kpi.gold .num{color:var(--gold);}
+.kpi.red .num{color:var(--red);}
+#kpiGrid{grid-template-columns:repeat(4,1fr);}
+#kpiGrid .kpi:nth-child(4){order:-1;grid-column:span 2;background-color:var(--bg-sidebar);background-image:var(--honey);padding:26px 28px;display:flex;flex-direction:column;justify-content:center;}
+#kpiGrid .kpi:nth-child(4):hover{background-color:var(--bg-sidebar);}
+#kpiGrid .kpi:nth-child(4) .num{font-size:46px;color:var(--brand);}
+#kpiGrid .kpi:nth-child(4) .lbl{color:var(--sidebar-text);font-size:13.5px;}
+#kpiGrid .kpi:last-child{grid-column:span 2;}
+#cobKpis{grid-template-columns:repeat(3,1fr);}
+
+.section-title{font-family:var(--font-h);font-size:18px;font-weight:700;color:var(--ink);margin:34px 0 14px;display:flex;align-items:center;gap:10px;letter-spacing:-.01em;}
+
+/* ============ LISTAS ============ */
+.mini-row{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:13px 18px;margin-bottom:8px;cursor:pointer;transition:border-color .18s,box-shadow .2s,transform .2s var(--ease);}
+.mini-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand);transform:scaleY(0);transition:transform .22s var(--ease);}
+.mini-row:hover{border-color:#bfe9de;box-shadow:0 10px 24px -14px rgba(7,24,43,.35);transform:translateY(-1px);}
+.mini-row:hover::before{transform:scaleY(1);}
+.mini-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mini-row .club{font-weight:600;font-size:14px;flex:1;}
+.mini-row .note{font-size:12.5px;color:var(--ink3);}
+.mini-row .tag{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px;flex-shrink:0;}
+.empty-state{text-align:center;padding:38px 20px;color:var(--ink3);font-size:13.5px;background:var(--bg-panel);border:1px dashed #c5d1de;border-radius:var(--r2);}
+.empty-state .ico{font-size:28px;margin-bottom:10px;color:var(--brand);opacity:.55;}
+
+/* ============ TABLA DE CLIENTES ============ */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.toolbar input,.toolbar select{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:var(--r);padding:10px 13px;font-size:13.5px;outline:none;font-family:var(--font-b);transition:border-color .15s,box-shadow .15s;}
+.toolbar input{flex:1;min-width:200px;}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+
+.tbl-wrap{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;}
+table.crm-tbl{width:100%;border-collapse:collapse;}
+.crm-tbl thead th{text-align:left;font-size:12.5px;color:var(--ink3);font-weight:600;padding:13px 18px;border-bottom:1px solid var(--line);background:#f7fafc;}
+.crm-tbl tbody td{padding:14px 18px;border-bottom:1px solid var(--line-soft);font-size:13.5px;vertical-align:middle;transition:background .15s;}
+.crm-tbl tbody tr:last-child td{border-bottom:none;}
+.crm-tbl tbody tr{cursor:pointer;}
+.crm-tbl tbody tr:hover td{background:var(--bg-hover);}
+.crm-tbl tbody tr:hover td:first-child{box-shadow:inset 4px 0 0 var(--brand);}
+.club-cell .name{font-weight:600;color:var(--ink);}
+.club-cell .contact{font-size:12.5px;color:var(--ink3);margin-top:2px;}
+.prod-chip{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-right:3px;letter-spacing:.2px;}
+.pc-tactiq{background:#d9f6ee;color:#066b58;}
+.pc-manager{background:#fff0cf;color:#8a5a05;}
+.pc-force{background:#e4ecf8;color:#2b4f8a;}
+.status-pill{font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;white-space:nowrap;display:inline-block;}
+.st-prospecto{background:#eaeff5;color:#51647a;}
+.st-conversacion{background:var(--gold-soft);color:#8a5a05;}
+.st-propuesta{background:#fdeadb;color:#b2531a;}
+.st-activo{background:var(--accent-soft);color:var(--accent-ink);}
+.st-vencido{background:var(--red-soft);color:var(--red);}
+.st-moroso{background:#fdf0cc;color:#8a6a10;}
+.st-cancelado{background:#ebeef2;color:#7a8794;}
+.monto-cell{font-weight:600;font-family:var(--font-b);font-variant-numeric:tabular-nums;font-size:13.5px;}
+.venc-cell{font-size:13px;}
+.row-actions{display:flex;gap:6px;justify-content:flex-end;}
+.icon-btn{background:#fff;border:1px solid var(--line);color:var(--ink2);width:30px;height:30px;border-radius:9px;cursor:pointer;font-size:12px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s var(--ease);}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent-ink);transform:translateY(-1px);}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.icon-btn.pay{border-color:#bfe9de;color:var(--accent-ink);}
+.icon-btn.pay:hover{background:var(--accent-soft);border-color:var(--accent);}
+
+/* ============ VENTANAS ============ */
+.modal-bg{position:fixed;inset:0;background:rgba(7,24,43,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-bg.open{display:flex;animation:fadeIn .2s ease;}
+.modal{width:100%;max-width:620px;max-height:88vh;overflow-y:auto;background:var(--bg-panel);border:1px solid var(--line);border-radius:24px;box-shadow:0 40px 90px -20px rgba(7,24,43,.55);}
+.modal-bg.open .modal{animation:modalIn .3s var(--ease);}
+#mDetail .modal{max-width:780px !important;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg-panel);z-index:2;}
+.modal-head h3{font-family:var(--font-h);font-size:19px;font-weight:800;letter-spacing:-.015em;}
+.modal-close{background:none;border:none;color:var(--ink3);font-size:16px;cursor:pointer;width:32px;height:32px;border-radius:50%;transition:background .15s,color .15s,transform .2s var(--ease);}
+.modal-close:hover{background:var(--bg-hover);color:var(--ink);transform:rotate(90deg);}
+.modal-body{padding:24px 26px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:18px 26px;border-top:1px solid var(--line);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg-full{grid-column:1/-1;}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:20px;padding:8px 15px;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s var(--ease);}
+.chip:hover{border-color:var(--accent);}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+
+/* Pestañas del detalle */
+.dt-tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-24px -26px 22px;padding:0 26px;overflow-x:auto;}
+.dt-tab{background:none;border:none;padding:14px 11px;font-size:12.5px;font-weight:500;color:var(--ink3);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;font-family:var(--font-b);white-space:nowrap;transition:color .18s,border-color .18s;}
+.dt-tab:hover{color:var(--ink);}
+.dt-tab.active{color:var(--accent-ink);font-weight:600;border-bottom-color:var(--brand);}
+.dt-panel{display:none;}
+.dt-panel.active{display:block;animation:fadeIn .25s ease;}
+
+.log-item{border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:10px;background:#f9fbfd;}
+.log-item .log-date{font-size:12px;font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;}
+.log-item .log-text{font-size:13.5px;color:var(--ink);margin-top:5px;line-height:1.5;}
+.log-item .log-next{font-size:12px;color:var(--gold);margin-top:7px;font-weight:600;}
+.log-del{float:right;background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:8px;transition:background .15s,color .15s;}
+.log-del:hover{background:var(--red-soft);color:var(--red);}
+.pay-item{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:var(--r);padding:11px 15px;margin-bottom:8px;background:#f9fbfd;transition:border-color .15s;}
+.pay-item:hover{border-color:#bfe9de;}
+.pay-item .pay-amt{font-family:var(--font-h);font-weight:800;color:var(--accent-ink);font-size:15px;font-variant-numeric:tabular-nums;}
+.pay-item .pay-date{font-size:12px;color:var(--ink3);}
+.pay-item .pay-note{font-size:12.5px;color:var(--ink2);margin-top:2px;}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--bg-sidebar);color:#fff;padding:13px 22px 13px 20px;border-radius:14px;border-left:4px solid var(--brand);font-size:13.5px;font-weight:500;z-index:500;box-shadow:0 18px 40px -10px rgba(7,24,43,.6);display:none;}
+.toast[style*="block"]{animation:toastIn .35s var(--ease);}
+
+.grow-bar{transform-origin:left;}
+.entering .grow-bar{animation:growX .8s var(--ease) both;}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes hexDraw{to{stroke-dashoffset:0}}
+@keyframes hexFill{to{fill-opacity:1}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,212,170,.55)}70%{box-shadow:0 0 0 7px rgba(0,212,170,0)}100%{box-shadow:0 0 0 0 rgba(0,212,170,0)}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+@media(max-width:1100px){
+  #kpiGrid{grid-template-columns:repeat(2,1fr);}
+  #cobKpis{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  #loginView{grid-template-columns:1fr;}
+  .login-art{padding:32px 20px 12px;}
+  .login-art svg{width:min(300px,70%);}
+  .login-claim .t{font-size:30px;}
+  .shell{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:static;flex-direction:row;align-items:center;padding:12px 16px;overflow-x:auto;}
+  .sb-brand{padding:0 14px 0 0;}
+  .sb-nav{flex-direction:row;}
+  .sb-link.active::before{display:none;}
+  .sb-spacer{display:none;}
+  .sb-sync,.sb-logout{display:none;}
+  .main{padding:22px 18px 60px;}
+  .page-head h1{font-size:26px;}
+  .form-grid{grid-template-columns:1fr;}
+  .crm-tbl thead{display:none;}
+  .crm-tbl tbody tr{display:block;padding:10px 0;}
+  .crm-tbl tbody td{display:block;border:none;padding:3px 18px;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important;}
+  .hx{stroke-dashoffset:0;fill-opacity:1;}
+  .hx-label{opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginView">
+  <div class="login-art">
+    <svg viewBox="0 0 560 540" role="img" aria-label="Tactiq, TactiqManager y TactiqForce: tres programas, un solo pack">
+      <g class="hx-group">
+        <polygon class="hx a" pathLength="1" points="280,10 401.2,80 401.2,220 280,290 158.8,220 158.8,80" fill="#00d4aa" stroke="#00d4aa"/>
+        <polygon class="hx b" pathLength="1" points="150,235 271.2,305 271.2,445 150,515 28.8,445 28.8,305" fill="#ffb22e" stroke="#ffb22e"/>
+        <polygon class="hx c" pathLength="1" points="410,235 531.2,305 531.2,445 410,515 288.8,445 288.8,305" fill="#0d2a47" stroke="#00d4aa"/>
+        <text class="hx-label" x="280" y="160" text-anchor="middle" style="font-family:var(--font-h);font-weight:800;font-size:32px" fill="#07182b">Tactiq</text>
+        <text class="hx-label" x="280" y="188" text-anchor="middle" style="font-family:var(--font-b);font-weight:600;font-size:15px" fill="#07182b">Videoanálisis</text>
+        <text class="hx-label" x="150" y="388" text-anchor="middle" style="font-family:var(--font-h);font-weight:800;font-size:27px" fill="#07182b">Manager</text>
+        <text class="hx-label" x="150" y="414" text-anchor="middle" style="font-family:var(--font-b);font-weight:600;font-size:15px" fill="#07182b">Gestión de clubes</text>
+        <text class="hx-label" x="410" y="388" text-anchor="middle" style="font-family:var(--font-h);font-weight:800;font-size:27px" fill="#ffffff">Force</text>
+        <text class="hx-label" x="410" y="414" text-anchor="middle" style="font-family:var(--font-b);font-weight:600;font-size:15px" fill="#9fb3c8">Preparación física</text>
+      </g>
+    </svg>
+    <div class="login-claim">
+      <div class="t">TactiqCRM</div>
+      <div class="s">Tus clubes, sus cobros y cada renovación, en un solo lugar.</div>
+    </div>
+  </div>
+  <div class="login-side">
+  <div class="login-box">
+    <div class="login-mark">TC</div>
+    <div class="login-title">Ingresá a tu CRM</div>
+    <div class="login-sub">Gestión de clientes de la suite Tactiq</div>
+    <div class="login-err" id="loginErr">Usuario o contraseña incorrectos</div>
+    <div class="field"><label>Usuario</label><input id="liUser" placeholder="admin"></div>
+    <div class="field"><label>Contraseña</label><input id="liPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-p btn-block" onclick="doLogin()" style="margin-top:6px">Ingresar</button>
+  </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView">
+  <div class="shell">
+    <div class="sidebar">
+      <div class="sb-brand"><div class="mark">T</div><div class="name">TactiqCRM</div></div>
+      <div class="sb-nav">
+        <button class="sb-link active" id="navDash" onclick="setTab('dashboard')"><i class="fa-solid fa-house"></i> Resumen</button>
+        <button class="sb-link" id="navClients" onclick="setTab('clientes')"><i class="fa-solid fa-building"></i> Clientes</button>
+        <button class="sb-link" id="navCobros" onclick="setTab('cobranzas')"><i class="fa-solid fa-coins"></i> Cobranzas</button>
+        <button class="sb-link" onclick="openBackupModal()"><i class="fa-solid fa-floppy-disk"></i> Respaldo y Excel</button>
+      </div>
+      <div class="sb-spacer"></div>
+      <div class="sb-sync" onclick="openSyncModal()"><span class="sb-dot" id="syncDot"></span><span id="syncLabel">Solo en este dispositivo</span></div>
+      <button class="sb-logout" onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión</button>
+    </div>
+
+    <div class="main">
+      <!-- DASHBOARD -->
+      <div id="viewDashboard">
+        <div class="page-head">
+          <div><div class="eyebrow">Resumen</div><h1>Cómo está tu cartera</h1></div>
+          <button class="btn btn-p" onclick="openClientModal()"><i class="fa-solid fa-plus"></i> Nuevo cliente</button>
+        </div>
+        <div id="backupBanner"></div>
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="section-title"><i class="fa-solid fa-phone" style="color:var(--gold);font-size:13px"></i> Seguimientos pendientes</div>
+        <div id="followupList"></div>
+
+        <div class="section-title"><i class="fa-solid fa-bell" style="color:#c1611c;font-size:13px"></i> Alertas de renovación de plan</div>
+        <div id="planAlertsList"></div>
+
+        <div class="section-title"><i class="fa-solid fa-clock" style="color:var(--red);font-size:13px"></i> Próximos vencimientos (30 días)</div>
+        <div id="renewalsList"></div>
+      </div>
+
+      <!-- COBRANZAS -->
+      <div id="viewCobranzas" style="display:none">
+        <div class="page-head">
+          <div><div class="eyebrow">Cobranzas</div><h1 id="cobTitulo">Cobros del mes</h1></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-s" onclick="cobMover(-1)">‹ Mes anterior</button>
+            <button class="btn btn-s" onclick="cobHoy()">Hoy</button>
+            <button class="btn btn-s" onclick="cobMover(1)">Mes siguiente ›</button>
+          </div>
+        </div>
+        <div class="kpi-grid" id="cobKpis"></div>
+        <div style="font-size:11.5px;color:var(--ink3);margin:-14px 0 22px;line-height:1.6" id="cobNota"></div>
+
+        <div class="section-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red);font-size:13px"></i> Atrasadas de meses anteriores</div>
+        <div id="cobAtrasadas"></div>
+
+        <div class="section-title"><i class="fa-solid fa-coins" style="color:var(--gold);font-size:13px"></i> Cuotas del mes</div>
+        <div id="cobLista"></div>
+
+        <div class="section-title"><i class="fa-solid fa-chart-column" style="color:var(--accent-ink);font-size:13px"></i> Cobros esperados — próximos 6 meses</div>
+        <div id="cobProyeccion"></div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="viewClientes" style="display:none">
+        <div class="page-head">
+          <div><div class="eyebrow">Cartera</div><h1>Clientes</h1><div class="sub" id="clientCount">0 clientes</div></div>
+          <button class="btn btn-p" onclick="openClientModal()"><i class="fa-solid fa-plus"></i> Nuevo cliente</button>
+        </div>
+        <div class="toolbar">
+          <input id="searchInput" placeholder="Buscar por club o contacto..." oninput="renderClients()">
+          <select id="filterProduct" onchange="renderClients()">
+            <option value="">Todos los productos</option>
+            <option value="tactiq">Tactiq</option>
+            <option value="manager">TactiqManager</option>
+            <option value="force">TactiqForce</option>
+          </select>
+          <select id="filterStatus" onchange="renderClients()">
+            <option value="">Todos los estados</option>
+            <option value="prospecto">Prospecto</option>
+            <option value="conversacion">En conversación</option>
+            <option value="propuesta">Propuesta enviada</option>
+            <option value="activo">Activo</option>
+            <option value="vencido">Vencido</option>
+            <option value="moroso">Moroso</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="tbl-wrap">
+          <table class="crm-tbl">
+            <thead><tr>
+              <th>Club</th><th>Productos</th><th>Estado</th><th>Membresía</th><th>Vencimiento</th><th>Próx. contacto</th><th></th>
+            </tr></thead>
+            <tbody id="clientTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVO/EDITAR CLIENTE -->
+<div class="modal-bg" id="mClient">
+  <div class="modal">
+    <div class="modal-head"><h3 id="mClientTitle">Nuevo cliente</h3><button class="modal-close" onclick="closeModal('mClient')">✕</button></div>
+    <div class="modal-body" style="padding-top:20px">
+      <input type="hidden" id="cId">
+      <div class="form-grid">
+        <div class="field fg-full"><label>Club / Institución *</label><input id="cClub" placeholder="Ej: Club Atlético Demo"></div>
+        <div class="field fg-full"><label>Localidad</label><input id="cLocalidad" placeholder="Ej: Morteros, Córdoba"></div>
+        <div class="field fg-full">
+          <label>Logo del club</label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="cLogoPreview" style="width:44px;height:44px;border-radius:8px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"></div>
+            <input type="file" id="cLogoFile" accept="image/*" onchange="handleClientLogoUpload(event)" style="flex:1">
+            <button type="button" class="btn btn-s btn-xs" id="cLogoRemoveBtn" onclick="removeClientLogo()" style="display:none">Quitar</button>
+          </div>
+        </div>
+        <div class="field fg-full">
+          <label>Contactos</label>
+          <div id="cContactRows"></div>
+          <button class="btn btn-s btn-xs" type="button" onclick="addPendingContact()">+ Agregar contacto</button>
+          <div style="font-size:10.5px;color:var(--ink3);margin-top:8px;line-height:1.5">El primero es el contacto principal: es el que usan los avisos de WhatsApp y el que se ve en la lista de clientes.</div>
+        </div>
+
+        <div class="field fg-full" style="margin-bottom:-4px"><label style="color:var(--accent-ink)">Datos para facturar (opcional)</label></div>
+        <div class="field fg-full"><label>Razón social</label><input id="cRazon" placeholder="Ej: Club Atlético Ejemplo Asociación Civil"></div>
+        <div class="field"><label>CUIT</label><input id="cCuit" placeholder="Ej: 30-12345678-9" oninput="updateCuitHint()"><div id="cCuitHint" style="font-size:10.5px;margin-top:4px"></div></div>
+        <div class="field"><label>Condición frente al IVA</label>
+          <select id="cCondIva">
+            <option value="">Sin definir</option>
+            <option>Responsable Inscripto</option>
+            <option>Monotributista</option>
+            <option>IVA Exento</option>
+            <option>Consumidor Final</option>
+            <option>No Responsable</option>
+          </select>
+        </div>
+        <div class="field fg-full"><label>Domicilio fiscal</label><input id="cDomFiscal" placeholder="Calle, número, localidad, provincia"></div>
+        <div class="field fg-full"><label>Email para enviar la factura</label><input id="cEmailFact" type="email" placeholder="administracion@club.com"></div>
+
+        <div class="field fg-full"><label>Productos contratados</label>
+          <div class="chip-row">
+            <div class="chip" id="chipTactiq" onclick="toggleChip('chipTactiq')">Tactiq</div>
+            <div class="chip" id="chipManager" onclick="toggleChip('chipManager')">TactiqManager</div>
+            <div class="chip" id="chipForce" onclick="toggleChip('chipForce')">TactiqForce</div>
+          </div>
+        </div>
+
+        <div class="field"><label>Estado</label>
+          <select id="cEstado">
+            <option value="prospecto">Prospecto</option>
+            <option value="conversacion">En conversación</option>
+            <option value="propuesta">Propuesta enviada</option>
+            <option value="activo">Activo</option>
+            <option value="vencido">Vencido</option>
+            <option value="moroso">Moroso</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="field"><label>Monto de membresía ($)</label><input id="cMonto" type="number" min="0" placeholder="Ej: 15000" oninput="updateCuotaPreview()"></div>
+        <div class="field"><label>Periodicidad (duración de la membresía)</label>
+          <select id="cPeriodicidad" onchange="updateCuotaPreview()">
+            <option value="mensual">Mensual</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="semestral">Semestral</option>
+            <option value="anual">Anual</option>
+          </select>
+        </div>
+        <div class="field"><label>Frecuencia de cobro</label>
+          <select id="cFrecuenciaCobro" onchange="updateCuotaPreview()">
+            <option value="igual">Pago único (todo junto)</option>
+            <option value="mensual">Mensual</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="semestral">Semestral</option>
+          </select>
+        </div>
+        <div class="field fg-full" style="margin-top:-8px"><div id="cCuotaPreview" style="font-size:11.5px;color:var(--ink3)"></div></div>
+        <div class="field fg-full">
+          <label>Bonificaciones (opcional)</label>
+          <div style="font-size:10.5px;color:var(--ink3);margin-bottom:8px;line-height:1.5">Descuento en un rango de meses de la membresía. Ej.: meses 1 a 3 con 50 %.</div>
+          <div id="cBonifRows"></div>
+          <button class="btn btn-s btn-xs" type="button" onclick="addPendingBonif()">+ Agregar bonificación</button>
+          <div id="cBonifPreview" style="font-size:11.5px;color:var(--accent-ink);font-weight:600;margin-top:8px"></div>
+        </div>
+        <div class="field"><label>Fecha de inicio</label><input id="cInicio" type="date"></div>
+        <div class="field"><label>Próximo vencimiento</label><input id="cVencimiento" type="date"></div>
+        <div class="field fg-full" style="margin-top:-6px"><button class="btn btn-s btn-xs" onclick="calcularVencimiento()">↻ Calcular vencimiento (inicio + periodicidad)</button></div>
+
+        <div class="field"><label>Costo de renovación (si cambia)</label><input id="cCostoRenovacion" type="number" min="0" placeholder="Dejalo vacío si es el mismo monto"></div>
+        <div class="field"><label>Renovación automática</label>
+          <div class="chip-row">
+            <div class="chip" id="chipRenovNo" onclick="setRenovAuto(false)">No, aviso y gestiono a mano</div>
+            <div class="chip" id="chipRenovSi" onclick="setRenovAuto(true)">Sí, se renueva sola</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-s" onclick="closeModal('mClient')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveClient()">Guardar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETALLE DE CLIENTE (bitácora + pagos) -->
+<div class="modal-bg" id="mDetail">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="mDetailLogo" style="width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0"></div>
+        <div>
+          <h3 id="mDetailTitle">Cliente</h3>
+          <div style="font-size:11.5px;color:var(--ink3);margin-top:2px" id="mDetailSub"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('mDetail')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="dt-tabs">
+        <button class="dt-tab active" id="dtTabLog" onclick="setDetailTab('log')">📋 Bitácora de seguimiento</button>
+        <button class="dt-tab" id="dtTabPay" onclick="setDetailTab('pay')">💰 Pagos</button>
+        <button class="dt-tab" id="dtTabContactos" onclick="setDetailTab('contactos')">👥 Contactos</button>
+        <button class="dt-tab" id="dtTabBonif" onclick="setDetailTab('bonif')">🎁 Bonificaciones</button>
+        <button class="dt-tab" id="dtTabCred" onclick="setDetailTab('cred')">🔑 Credenciales</button>
+      </div>
+
+      <div class="dt-panel active" id="dtPanelLog">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input id="logText" placeholder="Ej: Lo llamé, dijo que lo piensa hasta el viernes" style="flex:1;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px">
+        </div>
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="field" style="margin-bottom:0"><label>Próximo contacto (opcional)</label><input id="logNext" type="date"></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn btn-p btn-block" onclick="addLogEntry()">+ Agregar a la bitácora</button></div>
+        </div>
+        <div id="logList"></div>
+      </div>
+
+      <div class="dt-panel" id="dtPanelPay">
+        <div id="dtFactCard"></div>
+        <button class="btn btn-p btn-block" id="btnMarcarPago" onclick="marcarPagoMensual(window._detailClientId)" style="margin-bottom:16px;background:var(--accent-ink)">
+          💰 <span id="btnMarcarPagoLabel">Marcar pago de este período (actualiza vencimiento)</span>
+        </button>
+        <div style="text-align:center;font-size:11px;color:var(--ink3);margin:-10px 0 16px">— o cargar un pago con otro monto/fecha —</div>
+        <div class="form-grid" style="margin-bottom:14px">
+          <div class="field" style="margin-bottom:0"><label>Fecha</label><input id="payDate" type="date"></div>
+          <div class="field" style="margin-bottom:0"><label>Monto ($)</label><input id="payAmount" type="number" min="0" placeholder="15000"></div>
+          <div class="field fg-full" style="margin-bottom:0"><label>Nota (opcional)</label><input id="payNote" placeholder="Ej: transferencia, agosto"></div>
+          <div class="field fg-full" style="margin-bottom:0"><label>Nº de factura (opcional)</label><input id="payFactura" placeholder="Ej: C 0001-00000123"></div>
+        </div>
+        <button class="btn btn-p btn-block" onclick="addPayment()" style="margin-bottom:16px">+ Registrar pago</button>
+        <div style="font-size:11.5px;color:var(--ink3);margin-bottom:10px" id="payTotal"></div>
+        <div id="payList"></div>
+      </div>
+
+      <div class="dt-panel" id="dtPanelContactos">
+        <div style="font-size:11.5px;color:var(--ink3);margin-bottom:16px;line-height:1.6">Las personas de contacto de este club. Para agregar, cambiar o quitar contactos usá <b>✏ Editar datos del cliente</b>.</div>
+        <div id="dtContactList"></div>
+      </div>
+
+      <div class="dt-panel" id="dtPanelBonif">
+        <div style="font-size:11.5px;color:var(--ink3);margin-bottom:16px;line-height:1.6">Cargá acá las bonificaciones de este cliente. Cada una descuenta un porcentaje de la membresía en un rango de meses (ej.: meses 1 a 3 con 50 %). Valen para el primer año; si querés repetirlas otro año, elegí "Repetir cada año" o agregá otra con los meses de ese año (ej.: 13 a 15). Lo ya cobrado no cambia: solo afecta a las cuotas que faltan. Se guarda solo.</div>
+        <div class="field" style="max-width:260px;margin-bottom:6px"><label>Período de membresía actual</label><input id="bonifPeriodo" type="number" min="1" oninput="setPeriodoActual(this.value)"></div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-bottom:16px;line-height:1.5">1 = primer año (en una membresía anual). Sube solo cuando se completan todas las cuotas. Si el cliente ya viene de antes, corregilo acá.</div>
+        <div id="bonifRows"></div>
+        <button class="btn btn-s" onclick="addBonif()" style="margin-bottom:18px">+ Agregar bonificación</button>
+        <div id="bonifPlan"></div>
+      </div>
+
+      <div class="dt-panel" id="dtPanelCred">
+        <div style="font-size:11.5px;color:var(--ink3);margin-bottom:16px;line-height:1.6">Guardá acá los usuarios y contraseñas que le diste a este cliente en cada programa, para tenerlos a mano si te los vuelven a pedir. Podés agregar todos los que necesites. Se guarda solo — no hace falta tocar "Guardar cliente".</div>
+
+        <div id="credBlocks"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-p" onclick="openMensajeModal(window._detailClientId)">💬 Enviar información</button>
+      <button class="btn btn-s" onclick="openClientModal(window._detailClientId)">✏ Editar datos del cliente</button>
+      <button class="btn btn-danger" onclick="deleteClient(window._detailClientId)">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SINCRONIZACIÓN -->
+<div class="modal-bg" id="mSync">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head"><h3>Sincronización en la nube</h3><button class="modal-close" onclick="closeModal('mSync')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.7;margin-bottom:16px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px">
+        Para ver tus clientes desde varios dispositivos, conectá tu propio proyecto de Firebase (gratis). Andá a
+        <a href="https://console.firebase.google.com" target="_blank" style="color:var(--accent-ink)">console.firebase.google.com</a> → creá un proyecto →
+        activá "Realtime Database" → copiá los datos de configuración web acá abajo.
+      </div>
+      <div class="field"><label>API Key</label><input id="fbApiKey" placeholder="AIza..."></div>
+      <div class="field"><label>Auth Domain</label><input id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com"></div>
+      <div class="field"><label>Database URL</label><input id="fbDatabaseURL" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com"></div>
+      <div class="field"><label>Project ID</label><input id="fbProjectId" placeholder="tu-proyecto"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" onclick="disconnectSync()">Desconectar</button>
+      <button class="btn btn-p" onclick="connectSync()">Guardar y conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RESPALDO Y EXCEL -->
+<div class="modal-bg" id="mBackup">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><h3>Respaldo y Excel</h3><button class="modal-close" onclick="closeModal('mBackup')">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.7;margin-bottom:16px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px">
+        Tus datos viven en este navegador. Si borrás el historial o cambiás de compu, se pierden. Descargá un respaldo cada tanto y guardalo en un lugar seguro.
+        <div style="margin-top:6px;font-weight:700" id="bkLast"></div>
+      </div>
+      <div class="field"><label>Respaldo completo (para restaurar)</label>
+        <button class="btn btn-p btn-block" onclick="descargarRespaldo()">⬇ Descargar respaldo</button>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:6px;line-height:1.5">Incluye todo: clientes, pagos, contactos, bonificaciones y credenciales. Como trae contraseñas, no lo compartas.</div>
+      </div>
+      <div class="field"><label>Restaurar desde un respaldo</label>
+        <input type="file" id="restoreFile" accept=".json,application/json" onchange="restaurarRespaldo(event)">
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:6px;line-height:1.5">Reemplaza los clientes de este navegador por los del archivo. Antes te pide confirmar.</div>
+      </div>
+      <div class="field" style="margin-bottom:0"><label>Excel</label>
+        <button class="btn btn-s btn-block" onclick="exportarExcel()">📊 Exportar a Excel</button>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:6px;line-height:1.5">Hojas: Clientes, Pagos, Contactos y Cuotas. No incluye contraseñas. Si Excel avisa que el formato no coincide con la extensión, aceptá y se abre normal.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ENVIAR INFORMACIÓN -->
+<div class="modal-bg" id="mMensaje">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-head"><h3 id="msgTitulo">Enviar información</h3><button class="modal-close" onclick="closeModal('mMensaje')">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Para</label><select id="msgDest" onchange="armarMensaje()"></select></div>
+      <div class="field"><label>Qué incluir</label>
+        <div class="chip-row" id="msgChips">
+          <div class="chip on" id="msgChip_links" onclick="toggleMsgOpt('links')">Links de ingreso</div>
+          <div class="chip on" id="msgChip_cred" onclick="toggleMsgOpt('cred')">Credenciales</div>
+          <div class="chip" id="msgChip_cuota" onclick="toggleMsgOpt('cuota')">Próxima cuota</div>
+          <div class="chip" id="msgChip_cobro" onclick="toggleMsgOpt('cobro')">Datos para abonar</div>
+        </div>
+      </div>
+      <div class="field"><label>Mis datos para abonar (alias, CBU…) — se guardan para la próxima</label><textarea id="msgCobro" rows="2" oninput="guardarDatosCobro(); armarMensaje()" placeholder="Ej: Alias: tactiq.pagos · Titular: Laura …"></textarea></div>
+      <div class="field" style="margin-bottom:6px"><label>Mensaje (podés editarlo antes de enviar)</label><textarea id="msgTexto" rows="11" style="font-family:inherit;line-height:1.5"></textarea></div>
+      <div id="msgAviso" style="font-size:11px;color:#c1611c;line-height:1.5"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-s" onclick="copiarMensaje()"><i class="fa-regular fa-copy"></i> Copiar</button>
+      <button class="btn btn-s" onclick="enviarMensajeEmail()"><i class="fa-regular fa-envelope"></i> Email</button>
+      <button class="btn btn-p" style="background:#25D366" onclick="enviarMensajeWhatsApp()"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   ESTADO Y PERSISTENCIA LOCAL
+================================================================ */
+const LS_KEY='tactiqcrm_clients';
+const LS_CFG='tactiqcrm_config';
+const ADMIN_USER='admin', ADMIN_PASS='crm2026';
+
+function load(key, fallback){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+function persistClients(){ localStorage.setItem(LS_KEY, JSON.stringify(state.clients)); syncPush(); }
+
+let state = {
+  clients: load(LS_KEY, []),
+  config: load(LS_CFG, { firebase:null }),
+  tab: 'dashboard',
+};
+let fbApp=null, fbDb=null, fbAuth=null, fbReady=false;
+let loggedIn=false;
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('es-AR'); }
+function fmtDate(d){ return d ? new Date(d+'T12:00:00').toLocaleDateString('es-AR') : '—'; }
+function daysUntil(dateStr){ if(!dateStr)return null; const d=new Date(dateStr+'T00:00:00'); const today=new Date(); today.setHours(0,0,0,0); return Math.round((d-today)/86400000); }
+function ensureClientShape(c){
+  if(!c.interactions) c.interactions=[];
+  if(!c.payments) c.payments=[];
+  normalizeCredenciales(c);
+  normalizeBonificaciones(c);
+  normalizeContactos(c);
+  if(!(Number(c.periodoActual)>=1)) c.periodoActual=1;
+  if(!c.frecuenciaCobro) c.frecuenciaCobro='igual';
+  if(c.cuotasPagadas==null) c.cuotasPagadas=0;
+  return c;
+}
+
+/* Duración de la membresía (periodicidad) vs. cómo se cobra (frecuenciaCobro).
+   Ej: membresía anual cobrada en cuotas mensuales = 12 cuotas de monto/12. */
+function calcCuotas(monto, periodicidad, frecuenciaCobro){
+  const monthsMap = {mensual:1, trimestral:3, semestral:6, anual:12};
+  const perMonths = monthsMap[periodicidad] || 1;
+  const frecMonths = (!frecuenciaCobro || frecuenciaCobro==='igual') ? perMonths : (monthsMap[frecuenciaCobro] || perMonths);
+  const installments = Math.max(1, Math.round(perMonths/frecMonths));
+  const cuota = (Number(monto)||0) / installments;
+  return { installments, cuota };
+}
+function updateCuotaPreview(){
+  const monto = document.getElementById('cMonto').value;
+  const per = document.getElementById('cPeriodicidad').value;
+  const frec = document.getElementById('cFrecuenciaCobro').value;
+  const el = document.getElementById('cCuotaPreview');
+  if(!monto || !Number(monto)){ el.textContent=''; updateBonifPreview(); return; }
+  const {installments, cuota} = calcCuotas(monto, per, frec);
+  el.textContent = installments>1
+    ? `= ${installments} cuotas de ${fmtMoney(cuota)} cada una`
+    : `= 1 pago único de ${fmtMoney(Number(monto))}`;
+  updateBonifPreview();
+}
+
+/* ================================================================
+   LOGIN
+================================================================ */
+function doLogin(){
+  const u=document.getElementById('liUser').value.trim();
+  const p=document.getElementById('liPass').value;
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    loggedIn=true;
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('appView').style.display='block';
+    tryInitFirebase();
+    renderAll();
+    countUpKpis('kpiGrid');
+  } else {
+    const er = document.getElementById('loginErr');
+    er.style.display='block';
+    er.style.animation='none'; void er.offsetWidth; er.style.animation='';
+  }
+}
+function doLogout(){
+  if(!confirm('¿Cerrar sesión?'))return;
+  loggedIn=false;
+  document.getElementById('appView').style.display='none';
+  document.getElementById('loginView').style.display='grid';
+}
+
+/* ================================================================
+   FIREBASE (sincronización opcional en la nube)
+================================================================ */
+function tryInitFirebase(){
+  const cfg = state.config.firebase;
+  if(!cfg || !cfg.apiKey || !cfg.databaseURL){ updateSyncPill(false,false); return; }
+  try{
+    fbApp = firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(cfg);
+    fbDb = firebase.database();
+    fbAuth = firebase.auth();
+    fbAuth.signInAnonymously().catch(()=>{});
+    fbAuth.onAuthStateChanged(user=>{
+      if(user){
+        fbReady=true;
+        updateSyncPill(true,false);
+        fbDb.ref('tactiqcrm/clients').once('value').then(snap=>{
+          const remote = snap.val();
+          if(remote){
+            const remoteArr = (Array.isArray(remote)?remote:Object.values(remote)).map(ensureClientShape);
+            if(remoteArr.length >= state.clients.length){
+              state.clients = remoteArr;
+              localStorage.setItem(LS_KEY, JSON.stringify(state.clients));
+              renderAll();
+            }
+          }
+        });
+      }
+    });
+  }catch(e){
+    console.error('Error Firebase', e);
+    updateSyncPill(false,true);
+  }
+}
+function updateSyncPill(on, err){
+  const dot=document.getElementById('syncDot');
+  const lbl=document.getElementById('syncLabel');
+  dot.className='sb-dot'+(err?' err':on?' on':'');
+  lbl.textContent = err ? 'Error de sincronización' : on ? 'Sincronizado en la nube' : 'Solo en este dispositivo';
+}
+function syncPush(){
+  if(!fbReady || !fbDb) return;
+  fbDb.ref('tactiqcrm/clients').set(state.clients).catch(()=>{ updateSyncPill(false,true); });
+}
+function openSyncModal(){
+  const cfg = state.config.firebase || {};
+  document.getElementById('fbApiKey').value = cfg.apiKey || '';
+  document.getElementById('fbAuthDomain').value = cfg.authDomain || '';
+  document.getElementById('fbDatabaseURL').value = cfg.databaseURL || '';
+  document.getElementById('fbProjectId').value = cfg.projectId || '';
+  openModal('mSync');
+}
+function connectSync(){
+  const cfg = {
+    apiKey: document.getElementById('fbApiKey').value.trim(),
+    authDomain: document.getElementById('fbAuthDomain').value.trim(),
+    databaseURL: document.getElementById('fbDatabaseURL').value.trim(),
+    projectId: document.getElementById('fbProjectId').value.trim(),
+  };
+  if(!cfg.apiKey || !cfg.databaseURL){ showToast('⚠ Completá al menos API Key y Database URL'); return; }
+  state.config.firebase = cfg;
+  localStorage.setItem(LS_CFG, JSON.stringify(state.config));
+  closeModal('mSync');
+  showToast('Conectando con Firebase...');
+  tryInitFirebase();
+}
+function disconnectSync(){
+  state.config.firebase = null;
+  localStorage.setItem(LS_CFG, JSON.stringify(state.config));
+  fbReady=false; fbApp=null; fbDb=null; fbAuth=null;
+  updateSyncPill(false,false);
+  closeModal('mSync');
+  showToast('Sincronización desconectada');
+}
+
+/* ================================================================
+   NAVEGACIÓN
+================================================================ */
+/* Los números del resumen cuentan hasta su valor al entrar (una sola vez por visita) */
+function countUpKpis(containerId){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = document.getElementById(containerId); if(!box) return;
+  box.querySelectorAll('.num').forEach(el=>{
+    const original = el.textContent;
+    const m = original.match(/^(\$?)([\d.]+)$/); if(!m) return;
+    const target = Number(m[2].replace(/\./g,'')); if(!isFinite(target) || target<=0) return;
+    const t0 = performance.now(), dur = 900;
+    function step(t){
+      const p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3);
+      if(p<1){ el.textContent = m[1] + Math.round(target*e).toLocaleString('es-AR'); requestAnimationFrame(step); }
+      else el.textContent = original;
+    }
+    requestAnimationFrame(step);
+  });
+}
+function setTab(tab){
+  state.tab = tab;
+  document.getElementById('navDash').classList.toggle('active', tab==='dashboard');
+  document.getElementById('navClients').classList.toggle('active', tab==='clientes');
+  document.getElementById('navCobros').classList.toggle('active', tab==='cobranzas');
+  document.getElementById('viewDashboard').style.display = tab==='dashboard' ? 'block':'none';
+  document.getElementById('viewClientes').style.display = tab==='clientes' ? 'block':'none';
+  document.getElementById('viewCobranzas').style.display = tab==='cobranzas' ? 'block':'none';
+  renderAll();
+  if(tab==='dashboard') countUpKpis('kpiGrid');
+  if(tab==='cobranzas'){
+    const v = document.getElementById('viewCobranzas');
+    v.classList.add('entering'); setTimeout(()=>v.classList.remove('entering'), 1100);
+    countUpKpis('cobKpis');
+  }
+}
+function renderAll(){
+  renderDashboard();
+  renderClients();
+  renderCobranzas();
+  renderBackupBanner();
+}
+
+/* ================================================================
+   DASHBOARD
+================================================================ */
+const ESTADO_LABEL = {prospecto:'Prospecto', conversacion:'En conversación', propuesta:'Propuesta enviada', activo:'Activo', vencido:'Vencido', moroso:'Moroso', cancelado:'Cancelado'};
+
+function waLinkFromTel(telRaw, mensaje){
+  let tel = (telRaw||'').replace(/\D/g,''); // solo dígitos
+  if(!tel) return null;
+  if(!tel.startsWith('54')) tel = '54'+tel; // asumimos Argentina si no viene con código de país
+  return `https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`;
+}
+function buildWhatsAppLink(c, mensaje){ return waLinkFromTel(c.contactoTel, mensaje); }
+function mensajeAvisoRenovacion(c){
+  const nuevoCosto = c.costoRenovacion && Number(c.costoRenovacion)!==Number(c.monto) ? c.costoRenovacion : null;
+  let msg = `Hola! Te escribo de Tactiq. Te aviso que la suscripción de ${c.club} vence el ${fmtDate(c.vencimiento)}.`;
+  if(nuevoCosto) msg += ` A partir de esta renovación, el valor pasa a ser ${fmtMoney(nuevoCosto)} (${c.periodicidad}).`;
+  else msg += ` El monto sigue siendo ${fmtMoney(c.monto)} (${c.periodicidad}).`;
+  msg += ' ¿Seguimos con la renovación?';
+  return msg;
+}
+function firstBusinessDayBeforeMonth(vencStr){
+  if(!vencStr) return null;
+  const venc = new Date(vencStr+'T00:00:00');
+  let y = venc.getFullYear(), m = venc.getMonth()-1;
+  if(m<0){ m=11; y--; }
+  let d = new Date(y, m, 1);
+  while(d.getDay()===0 || d.getDay()===6){ d.setDate(d.getDate()+1); } // saltar sábado/domingo
+  return d;
+}
+
+/* ================================================================
+   COBRANZAS — cuotas esperadas por mes (con bonificaciones)
+   Regla: la cuota 1 vence en la fecha de inicio del cliente; las siguientes,
+   cada "frecuencia de cobro" (ej. mensual) a partir de esa fecha.
+================================================================ */
+let cobMes = { y:new Date().getFullYear(), m:new Date().getMonth() };
+const COB_ESTADOS = ['activo','vencido','moroso'];
+function cobMover(d){ const t=new Date(cobMes.y, cobMes.m+d, 1); cobMes={y:t.getFullYear(), m:t.getMonth()}; renderCobranzas(); }
+function cobHoy(){ const n=new Date(); cobMes={y:n.getFullYear(), m:n.getMonth()}; renderCobranzas(); }
+function addMonthsStr(dateStr, n){
+  const [y,m,d] = String(dateStr).slice(0,10).split('-').map(Number);
+  const t = new Date(y, m-1+n, 1);
+  const dim = new Date(t.getFullYear(), t.getMonth()+1, 0).getDate();
+  t.setDate(Math.min(d, dim));
+  return t;
+}
+function cobrosCliente(c){
+  if(!c.inicio || !(Number(c.monto)>0)) return [];
+  ensureClientShape(c);
+  const perMonths = {mensual:1, trimestral:3, semestral:6, anual:12}[c.periodicidad] || 1;
+  const {installments} = calcCuotas(c.monto, c.periodicidad, c.frecuenciaCobro);
+  const frecMonths = Math.max(1, Math.round(perMonths/installments));
+  const act = Number(c.periodoActual)||1;
+  const pagadas = c.cuotasPagadas||0;
+  const baseCuota = Number(c.monto)/installments;
+  const out = [];
+  const hasta = act + Math.ceil(12/perMonths) + 1;
+  for(let per=Math.max(1,act-1); per<=hasta; per++){
+    for(let n=1; n<=installments; n++){
+      const due = addMonthsStr(c.inicio, (per-1)*perMonths + (n-1)*frecMonths);
+      const pagada = per<act || (per===act && n<=pagadas);
+      const pago = (c.payments||[]).find(x=>x.periodo===per && x.cuota===n);
+      const monto = (pagada && pago) ? (Number(pago.amount)||0) : cuotaMonto(Object.assign({}, c, {periodoActual:per}), n);
+      out.push({client:c, periodo:per, nro:n, total:installments, due, pagada, monto, base:baseCuota,
+                esProxima: per===act && n===pagadas+1});
+    }
+  }
+  return out;
+}
+function mensajeCobro(x){
+  const c = x.client;
+  const cuota = x.total>1 ? `la cuota ${x.nro}/${x.total}` : 'el pago de la membresía';
+  return `Hola! Te escribo de Tactiq. Te recuerdo ${cuota} de ${c.club} por ${fmtMoney(x.monto)}${x.monto < x.base-0.005 ? ' (incluye tu bonificación)' : ''}, con vencimiento el ${x.due.toLocaleDateString('es-AR')}. ¡Gracias!`;
+}
+function cobAcciones(x){
+  const wa = buildWhatsAppLink(x.client, mensajeCobro(x));
+  const waBtn = wa
+    ? `<a href="${wa}" target="_blank" onclick="event.stopPropagation()" class="btn btn-p btn-xs" style="background:#25D366;text-decoration:none"><i class="fa-brands fa-whatsapp"></i> Recordar</a>`
+    : `<span style="font-size:10.5px;color:var(--ink3)" title="Cargale el teléfono de contacto">Sin teléfono</span>`;
+  const pagar = x.esProxima ? `<button class="btn btn-s btn-xs" onclick="event.stopPropagation();marcarPagoMensual('${x.client.id}')">✔ Marcar pago</button>` : '';
+  return `<div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">${waBtn}${pagar}</div>`;
+}
+function renderCobranzas(){
+  if(state.tab!=='cobranzas') return;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const mesIni = new Date(cobMes.y, cobMes.m, 1), mesFin = new Date(cobMes.y, cobMes.m+1, 1);
+  const nombreMes = mesIni.toLocaleDateString('es-AR',{month:'long', year:'numeric'});
+  document.getElementById('cobTitulo').textContent = nombreMes.charAt(0).toUpperCase()+nombreMes.slice(1);
+
+  const enSeguimiento = state.clients.filter(c=>COB_ESTADOS.includes(c.estado));
+  const sinDatos = enSeguimiento.filter(c=>!c.inicio || !(Number(c.monto)>0));
+  const todas = [];
+  enSeguimiento.forEach(c=>todas.push(...cobrosCliente(c)));
+
+  const delMes = todas.filter(x=>x.due>=mesIni && x.due<mesFin)
+    .sort((a,b)=>a.due-b.due || a.client.club.localeCompare(b.client.club));
+  const atrasadasPrev = todas.filter(x=>!x.pagada && x.due<mesIni && x.due<hoy);
+
+  const keyMes = `${cobMes.y}-${String(cobMes.m+1).padStart(2,'0')}`;
+  const cobrado = state.clients.reduce((sum,c)=>sum+(c.payments||[]).filter(p=>String(p.date||'').slice(0,7)===keyMes).reduce((s,p)=>s+(Number(p.amount)||0),0),0);
+  const sinFactura = state.clients.reduce((sum,c)=>sum+(c.payments||[]).filter(p=>String(p.date||'').slice(0,7)===keyMes && !String(p.factura||'').trim()).reduce((s,p)=>s+(Number(p.amount)||0),0),0);
+  const esperado = delMes.reduce((s,x)=>s+x.monto,0);
+  const pendiente = delMes.filter(x=>!x.pagada).reduce((s,x)=>s+x.monto,0);
+  const atrasado = atrasadasPrev.reduce((s,x)=>s+x.monto,0);
+  const descuentos = delMes.reduce((s,x)=>s+Math.max(0,x.base-x.monto),0);
+  const r = n=>fmtMoney(Math.round(n));
+  const kpis = [
+    {num:r(esperado), lbl:'A cobrar en el mes', cls:''},
+    {num:r(cobrado), lbl:'Cobrado en el mes', cls:'accent'},
+    {num:r(pendiente), lbl:'Pendiente del mes', cls:'gold'},
+    {num:r(atrasado), lbl:'Atrasado (meses anteriores)', cls:'red'},
+    {num:r(descuentos), lbl:'Descuentos por bonificación', cls:''},
+    {num:r(sinFactura), lbl:'Cobrado sin factura', cls:sinFactura>0?'gold':''},
+  ];
+  document.getElementById('cobKpis').innerHTML = kpis.map(k=>`<div class="kpi ${k.cls}"><div class="num">${k.num}</div><div class="lbl">${k.lbl}</div></div>`).join('');
+  document.getElementById('cobNota').innerHTML =
+    `Las cuotas se calculan desde la <b>fecha de inicio</b> de cada cliente: la cuota 1 vence ese día y las siguientes según su frecuencia de cobro. Si un cliente ya venía de antes, corregí su <b>"Período de membresía actual"</b> (pestaña 🎁 Bonificaciones) para que no aparezcan cuotas viejas como atrasadas.`
+    + (sinDatos.length ? `<br><span style="color:#c1611c">⚠ ${sinDatos.length} cliente${sinDatos.length!==1?'s':''} en seguimiento no aparece${sinDatos.length!==1?'n':''} acá por no tener monto o fecha de inicio: ${sinDatos.map(c=>esc(c.club)).join(', ')}.</span>` : '');
+
+  // Atrasadas: una fila por cliente
+  const porCliente = {};
+  atrasadasPrev.forEach(x=>{ (porCliente[x.client.id] = porCliente[x.client.id] || []).push(x); });
+  const aEl = document.getElementById('cobAtrasadas');
+  const ids = Object.keys(porCliente);
+  aEl.innerHTML = !ids.length
+    ? `<div class="empty-state"><div class="ico"><i class="fa-regular fa-circle-check"></i></div>No hay cuotas atrasadas de meses anteriores</div>`
+    : `<div class="tbl-wrap"><table class="crm-tbl"><thead><tr><th>Club</th><th>Cuotas atrasadas</th><th>Desde</th><th>Monto</th><th></th></tr></thead><tbody>${
+        ids.map(id=>{
+          const xs = porCliente[id].sort((a,b)=>a.due-b.due);
+          const prox = xs.find(x=>x.esProxima) || xs[0];
+          const total = xs.reduce((s,x)=>s+x.monto,0);
+          return `<tr onclick="openDetailModal('${id}')"><td><b>${esc(xs[0].client.club)}</b></td><td>${xs.length}</td><td>${xs[0].due.toLocaleDateString('es-AR')}</td><td><b style="color:var(--red)">${fmtMoney(Math.round(total))}</b></td><td>${cobAcciones(prox)}</td></tr>`;
+        }).join('')}</tbody></table></div>`;
+
+  // Cuotas del mes
+  const lEl = document.getElementById('cobLista');
+  if(!delMes.length){
+    lEl.innerHTML = `<div class="empty-state"><div class="ico"><i class="fa-regular fa-calendar"></i></div>No hay cuotas que venzan en este mes</div>`;
+  } else {
+    lEl.innerHTML = `<div class="tbl-wrap"><table class="crm-tbl"><thead><tr><th>Club</th><th>Cuota</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody>${
+      delMes.map(x=>{
+        const atras = !x.pagada && x.due<hoy;
+        const est = x.pagada ? ['Pagada','var(--accent-ink)','var(--accent-soft)'] : atras ? ['Atrasada','var(--red)','var(--red-soft)'] : ['Pendiente','#96731a','#fdf3d9'];
+        const bonif = x.monto < x.base-0.005 ? ` <span style="font-size:10px;font-weight:800;color:var(--accent-ink);background:var(--accent-soft);padding:2px 7px;border-radius:20px">BONIF.</span>` : '';
+        return `<tr onclick="openDetailModal('${x.client.id}')"><td><b>${esc(x.client.club)}</b></td><td>${x.total>1 ? x.nro+'/'+x.total : 'Pago del período'}</td><td>${x.due.toLocaleDateString('es-AR')}</td><td>${fmtMoney(Math.round(x.monto*100)/100)}${bonif}</td><td><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;color:${est[1]};background:${est[2]}">${est[0]}</span></td><td>${x.pagada ? '' : cobAcciones(x)}</td></tr>`;
+      }).join('')}</tbody></table></div>`;
+  }
+
+  // Proyección 6 meses desde el mes actual real
+  const arr = [];
+  const base = new Date(); base.setDate(1); base.setHours(0,0,0,0);
+  for(let k=0;k<6;k++){
+    const ini = new Date(base.getFullYear(), base.getMonth()+k, 1), fin = new Date(base.getFullYear(), base.getMonth()+k+1, 1);
+    const tot = todas.filter(x=>x.due>=ini && x.due<fin).reduce((s,x)=>s+x.monto,0);
+    arr.push({label: ini.toLocaleDateString('es-AR',{month:'short', year:'2-digit'}), tot});
+  }
+  const max = Math.max(1, ...arr.map(a=>a.tot));
+  document.getElementById('cobProyeccion').innerHTML = `<div class="tbl-wrap" style="padding:16px 20px">${
+    arr.map(a=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><div style="width:62px;font-size:11.5px;color:var(--ink3);text-transform:capitalize">${a.label}</div><div style="flex:1;background:var(--bg);border-radius:6px;height:16px;overflow:hidden"><div class="grow-bar" style="width:${Math.round(a.tot/max*100)}%;height:100%;background:var(--brand);border-radius:6px"></div></div><div style="width:110px;text-align:right;font-size:12.5px;font-weight:700">${fmtMoney(Math.round(a.tot))}</div></div>`).join('')
+  }</div>`;
+}
+
+function renderDashboard(){
+  const clients = state.clients;
+  const activos = clients.filter(c=>c.estado==='activo');
+  const vencidos = clients.filter(c=>c.estado==='vencido');
+  const morosos = clients.filter(c=>c.estado==='moroso');
+  const prospectos = clients.filter(c=>['prospecto','conversacion','propuesta'].includes(c.estado));
+
+  const mrr = activos.reduce((sum,c)=>{
+    const monto = Number(c.monto)||0;
+    const factor = { mensual:1, trimestral:1/3, semestral:1/6, anual:1/12 }[c.periodicidad] || 1;
+    return sum + monto*factor;
+  }, 0);
+
+  const totalCobrado = clients.reduce((sum,c)=>sum + (c.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0), 0);
+
+  const kpis = [
+    { num: clients.length, lbl:'Clientes totales', cls:'' },
+    { num: activos.length, lbl:'Activos', cls:'accent' },
+    { num: prospectos.length, lbl:'En proceso de venta', cls:'gold' },
+    { num: fmtMoney(Math.round(mrr)), lbl:'Ingreso mensual recurrente', cls:'accent' },
+    { num: fmtMoney(totalCobrado), lbl:'Total histórico cobrado', cls:'' },
+    { num: vencidos.length+morosos.length, lbl:'Vencidos / morosos', cls:'red' },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
+    <div class="kpi ${k.cls}">
+      <div class="num">${k.num}</div>
+      <div class="lbl">${k.lbl}</div>
+    </div>`).join('');
+
+  // Seguimientos pendientes: clientes cuya última entrada de bitácora dejó un "próximo contacto" <= hoy+7
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const followups = [];
+  clients.forEach(c=>{
+    const log = (c.interactions||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+    const last = log[0];
+    if(last && last.next){
+      const days = daysUntil(last.next);
+      if(days!==null && days<=7) followups.push({client:c, days, note:last.text});
+    }
+  });
+  followups.sort((a,b)=>a.days-b.days);
+  const fEl = document.getElementById('followupList');
+  if(!followups.length){
+    fEl.innerHTML = `<div class="empty-state"><div class="ico"><i class="fa-regular fa-comments"></i></div>Sin seguimientos programados para los próximos días</div>`;
+  } else {
+    fEl.innerHTML = followups.map(f=>{
+      const late = f.days<0;
+      const color = late?'var(--red)':f.days<=1?'var(--gold)':'var(--accent-ink)';
+      const label = late?`Atrasado ${Math.abs(f.days)}d`:f.days===0?'Hoy':f.days===1?'Mañana':`En ${f.days}d`;
+      return `<div class="mini-row" onclick="openDetailModal('${f.client.id}')">
+        <div class="mini-dot" style="background:${color}"></div>
+        <div class="club">${esc(f.client.club)}</div>
+        <div class="note">${esc(f.note||'')}</div>
+        <div class="tag" style="background:${color}18;color:${color}">${label}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Alertas de renovación de plan — primer día hábil del mes anterior al vencimiento
+  const planAlerts = [];
+  clients.forEach(c=>{
+    if(!c.vencimiento || c.estado==='cancelado') return;
+    const alertDate = firstBusinessDayBeforeMonth(c.vencimiento);
+    const venc = new Date(c.vencimiento+'T00:00:00');
+    if(alertDate && hoy>=alertDate && hoy<=venc){
+      planAlerts.push({client:c, days:daysUntil(c.vencimiento)});
+    }
+  });
+  planAlerts.sort((a,b)=>a.days-b.days);
+  const pEl = document.getElementById('planAlertsList');
+  if(!planAlerts.length){
+    pEl.innerHTML = `<div class="empty-state"><div class="ico"><i class="fa-regular fa-bell"></i></div>Ningún club entró todavía en ventana de aviso de renovación</div>`;
+  } else {
+    pEl.innerHTML = planAlerts.map(a=>{
+      const c = a.client;
+      const nuevoCosto = c.costoRenovacion && Number(c.costoRenovacion)!==Number(c.monto) ? c.costoRenovacion : null;
+      const autoTag = c.renovacionAutomatica
+        ? `<span style="font-size:10px;font-weight:800;color:var(--accent-ink);background:var(--accent-soft);padding:2px 8px;border-radius:20px">RENUEVA SOLA</span>`
+        : `<span style="font-size:10px;font-weight:800;color:#c1611c;background:#fdeee0;padding:2px 8px;border-radius:20px">AVISAR Y GESTIONAR</span>`;
+      const waLink = buildWhatsAppLink(c, mensajeAvisoRenovacion(c));
+      const waBtn = waLink
+        ? `<a href="${waLink}" target="_blank" onclick="event.stopPropagation()" class="btn btn-p btn-xs" style="background:#25D366;text-decoration:none"><i class="fa-brands fa-whatsapp"></i> Avisar</a>`
+        : `<span style="font-size:10.5px;color:var(--ink3)" title="Cargale el teléfono de contacto para poder avisarle">Sin teléfono</span>`;
+      return `<div class="mini-row" onclick="openDetailModal('${c.id}')" style="border-color:#f0d4b8;background:#fffaf3">
+        <div class="mini-dot" style="background:#c1611c"></div>
+        <div class="club">${esc(c.club)}</div>
+        <div class="note">Vence ${fmtDate(c.vencimiento)} · ${fmtMoney(c.monto)}${nuevoCosto?` → <b style="color:var(--ink)">${fmtMoney(nuevoCosto)}</b>`:''} /${(c.periodicidad||'').slice(0,3)}</div>
+        ${autoTag}
+        ${waBtn}
+      </div>`;
+    }).join('');
+  }
+
+  // Próximos vencimientos
+  const withVenc = clients.filter(c=>c.vencimiento && c.estado!=='cancelado');
+  const upcoming = withVenc.map(c=>({...c, days: daysUntil(c.vencimiento)}))
+    .filter(c=>c.days!==null && c.days<=30)
+    .sort((a,b)=>a.days-b.days);
+  const rEl = document.getElementById('renewalsList');
+  if(!upcoming.length){
+    rEl.innerHTML = `<div class="empty-state"><div class="ico"><i class="fa-regular fa-calendar-check"></i></div>Sin vencimientos en los próximos 30 días</div>`;
+  } else {
+    rEl.innerHTML = upcoming.map(c=>{
+      const late = c.days<0;
+      const color = late ? 'var(--red)' : c.days<=7 ? 'var(--gold)' : 'var(--accent-ink)';
+      const label = late ? `Vencido hace ${Math.abs(c.days)}d` : c.days===0 ? 'Vence hoy' : `Vence en ${c.days}d`;
+      return `<div class="mini-row" onclick="openDetailModal('${c.id}')">
+        <div class="mini-dot" style="background:${color}"></div>
+        <div class="club">${esc(c.club)}</div>
+        <div class="note">${fmtMoney(c.monto)} · ${c.periodicidad}</div>
+        <div class="tag" style="background:${color}18;color:${color}">${label}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+/* ================================================================
+   CLIENTES (lista en tabla)
+================================================================ */
+function renderClients(){
+  const search = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  const fProduct = document.getElementById('filterProduct')?.value||'';
+  const fStatus = document.getElementById('filterStatus')?.value||'';
+
+  let list = state.clients.filter(c=>{
+    if(search && !(c.club||'').toLowerCase().includes(search) && !(c.contactoNombre||'').toLowerCase().includes(search) && !((c.contactos||[]).some(x=>((x.nombre||'')+' '+(x.cargo||'')).toLowerCase().includes(search)))) return false;
+    if(fProduct && !(c.productos||[]).includes(fProduct)) return false;
+    if(fStatus && c.estado!==fStatus) return false;
+    return true;
+  }).sort((a,b)=>(a.club||'').localeCompare(b.club||''));
+
+  document.getElementById('clientCount').textContent = state.clients.length+' cliente'+(state.clients.length!==1?'s':'');
+
+  const tbody = document.getElementById('clientTableBody');
+  if(!list.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--ink3)">
+      ${state.clients.length? 'Ningún cliente coincide con el filtro' : 'Todavía no cargaste ningún cliente'}</td></tr>`;
+    return;
+  }
+  const prodLabel = {tactiq:['TCQ','pc-tactiq'], manager:['MGR','pc-manager'], force:['FRC','pc-force']};
+  tbody.innerHTML = list.map(c=>{
+    const days = daysUntil(c.vencimiento);
+    let vencColor='var(--ink2)', vencTxt=fmtDate(c.vencimiento);
+    if(days!==null){
+      if(days<0){ vencColor='var(--red)'; vencTxt+=' (vencido)'; }
+      else if(days<=7){ vencColor='var(--gold)'; vencTxt+=` (${days}d)`; }
+    }
+    const log = (c.interactions||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+    const nextContact = log[0]?.next ? fmtDate(log[0].next) : '—';
+
+    return `<tr onclick="openDetailModal('${c.id}')">
+      <td class="club-cell">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:7px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+            ${c.logo?`<img src="${c.logo}" style="width:100%;height:100%;object-fit:contain">`:`<i class="fa-solid fa-building" style="color:var(--ink3);font-size:12px"></i>`}
+          </div>
+          <div>
+            <div class="name">${esc(c.club)}</div>
+            <div class="contact">${c.localidad?esc(c.localidad)+' · ':''}${esc(c.contactoNombre||'Sin contacto')}${c.contactoTel?' · '+esc(c.contactoTel):''}${(c.contactos||[]).length>1?' · +'+((c.contactos||[]).length-1)+' más':''}</div>
+          </div>
+        </div>
+      </td>
+      <td>${(c.productos||[]).map(p=>`<span class="prod-chip ${prodLabel[p][1]}">${prodLabel[p][0]}</span>`).join('')||'<span style="color:var(--ink3);font-size:11.5px">—</span>'}</td>
+      <td><span class="status-pill st-${c.estado}">${ESTADO_LABEL[c.estado]||c.estado}</span></td>
+      <td class="monto-cell">${fmtMoney(c.monto)}<span style="color:var(--ink3);font-weight:500;font-size:10.5px"> /${(c.periodicidad||'').slice(0,3)}</span>${(()=>{const {installments}=calcCuotas(c.monto,c.periodicidad,c.frecuenciaCobro);return installments>1?`<div style="font-size:10px;color:var(--ink3);font-weight:500">cuota ${(c.cuotasPagadas||0)+1}/${installments}</div>`:'';})()}</td>
+      <td class="venc-cell" style="color:${vencColor}">${vencTxt}</td>
+      <td style="font-size:12px;color:var(--ink2)">${nextContact}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="row-actions">
+          <button class="icon-btn pay" onclick="marcarPagoMensual('${c.id}')" title="Marcar pago de este mes"><i class="fa-solid fa-dollar-sign"></i></button>
+          <button class="icon-btn" onclick="openClientModal('${c.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+          <button class="icon-btn danger" onclick="deleteClient('${c.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function avanzarVencimiento(c){
+  // Avanza el vencimiento un período de MEMBRESÍA (no de cobro) desde donde estaba
+  const base = c.vencimiento ? new Date(c.vencimiento+'T00:00:00') : new Date();
+  const months = { mensual:1, trimestral:3, semestral:6, anual:12 }[c.periodicidad] || 1;
+  base.setMonth(base.getMonth()+months);
+  c.vencimiento = base.toISOString().slice(0,10);
+  c.estado = 'activo';
+  c.periodoActual = (Number(c.periodoActual)||1) + 1; // pasó un período de membresía
+}
+
+function marcarPagoMensual(id){
+  const c = state.clients.find(x=>x.id===id); if(!c) return;
+  ensureClientShape(c);
+  const montoTotal = Number(c.monto)||0;
+  if(!montoTotal){ showToast('⚠ Este cliente no tiene un monto de membresía cargado — editalo primero'); openClientModal(id); return; }
+
+  const periodoLabel = {mensual:'este mes', trimestral:'este trimestre', semestral:'este semestre', anual:'este año'}[c.periodicidad] || 'este período';
+  const {installments, cuota} = calcCuotas(montoTotal, c.periodicidad, c.frecuenciaCobro);
+
+  if(installments<=1){
+    // Pago único de todo el período (comportamiento de siempre)
+    const montoPago = cuotaMonto(c,1);
+    const conBonif = montoPago < montoTotal-0.005;
+    if(!confirm(`¿Registrar el pago de ${fmtMoney(montoPago)}${conBonif?' (con bonificación)':''} de ${c.club} correspondiente a ${periodoLabel}? Esto también actualiza el vencimiento.`)) return;
+    c.payments.push({id:uid(), date:new Date().toISOString().slice(0,10), amount:montoPago, note:'Pago '+periodoLabel+(conBonif?' (con bonificación)':''), cuota:1, periodo:Number(c.periodoActual)||1});
+    c.cuotasPagadas = 0;
+    avanzarVencimiento(c);
+    persistClients();
+    renderAll();
+    if(window._detailClientId===id){ renderPayList(); document.getElementById('mDetailSub').textContent = [ESTADO_LABEL[c.estado], c.localidad, c.contactoNombre].filter(Boolean).join(' · '); updatePagoButtonLabel(c); renderBonifs(); }
+    showToast(`✅ Pago registrado — ${c.club} al día hasta el ${new Date(c.vencimiento+'T00:00:00').toLocaleDateString('es-AR')}`);
+    return;
+  }
+
+  // Membresía por período (ej: anual) cobrada en cuotas (ej: mensuales)
+  const nroCuota = (c.cuotasPagadas||0)+1;
+  const cuotaReal = cuotaMonto(c,nroCuota);
+  const cuotaConBonif = cuotaReal < cuota-0.005;
+  if(!confirm(`¿Registrar la cuota ${nroCuota}/${installments} de ${fmtMoney(cuotaReal)}${cuotaConBonif?' (con bonificación)':''} de ${c.club}?`)) return;
+  c.payments.push({id:uid(), date:new Date().toISOString().slice(0,10), amount:cuotaReal, note:`Cuota ${nroCuota}/${installments} — membresía ${periodoLabel}${cuotaConBonif?' (con bonificación)':''}`, cuota:nroCuota, periodo:Number(c.periodoActual)||1});
+  c.cuotasPagadas = nroCuota;
+  c.estado = 'activo';
+
+  let msg;
+  if(c.cuotasPagadas >= installments){
+    // Se completaron todas las cuotas del período: recién ahí avanza el vencimiento
+    c.cuotasPagadas = 0;
+    avanzarVencimiento(c);
+    msg = `✅ Última cuota registrada — ${c.club} al día hasta el ${new Date(c.vencimiento+'T00:00:00').toLocaleDateString('es-AR')}`;
+  } else {
+    msg = `✅ Cuota ${nroCuota}/${installments} registrada de ${c.club}`;
+  }
+
+  persistClients();
+  renderAll();
+  if(window._detailClientId===id){ renderPayList(); document.getElementById('mDetailSub').textContent = [ESTADO_LABEL[c.estado], c.localidad, c.contactoNombre].filter(Boolean).join(' · '); updatePagoButtonLabel(c); renderBonifs(); }
+  showToast(msg);
+}
+
+/* ================================================================
+   MODAL CLIENTE (datos generales)
+================================================================ */
+let activeChips = new Set();
+let pendingRenovAuto = false;
+function setRenovAuto(val){
+  pendingRenovAuto = val;
+  document.getElementById('chipRenovSi').classList.toggle('on', val===true);
+  document.getElementById('chipRenovNo').classList.toggle('on', val===false);
+}
+let pendingLogo = null; // base64 del logo mientras se edita el modal
+function handleClientLogoUpload(e){
+  const file = e.target.files[0]; if(!file) return;
+  if(file.size > 1.5*1024*1024){ showToast('⚠ La imagen es muy pesada (máx. 1.5MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => { pendingLogo = ev.target.result; renderLogoPreview(); };
+  reader.readAsDataURL(file);
+}
+function removeClientLogo(){
+  pendingLogo = '';
+  document.getElementById('cLogoFile').value = '';
+  renderLogoPreview();
+}
+function renderLogoPreview(){
+  const box = document.getElementById('cLogoPreview');
+  const removeBtn = document.getElementById('cLogoRemoveBtn');
+  if(pendingLogo){
+    box.innerHTML = `<img src="${pendingLogo}" style="width:100%;height:100%;object-fit:contain">`;
+    removeBtn.style.display='inline-flex';
+  } else {
+    box.innerHTML = `<i class="fa-solid fa-building" style="color:var(--ink3);font-size:15px"></i>`;
+    removeBtn.style.display='none';
+  }
+}
+function toggleChip(id){
+  document.getElementById(id).classList.toggle('on');
+  const key = {chipTactiq:'tactiq', chipManager:'manager', chipForce:'force'}[id];
+  if(activeChips.has(key)) activeChips.delete(key); else activeChips.add(key);
+}
+function openClientModal(id){
+  closeModal('mDetail');
+  document.getElementById('mClientTitle').textContent = id ? 'Editar cliente' : 'Nuevo cliente';
+  document.getElementById('cId').value = id||'';
+  document.getElementById('cLogoFile').value = '';
+  activeChips = new Set();
+  ['chipTactiq','chipManager','chipForce'].forEach(cid=>document.getElementById(cid).classList.remove('on'));
+
+  if(id){
+    const c = state.clients.find(x=>x.id===id);
+    ensureClientShape(c);
+    pendingBonifs = JSON.parse(JSON.stringify(c.bonificaciones));
+    document.getElementById('cClub').value = c.club||'';
+    document.getElementById('cLocalidad').value = c.localidad||'';
+    pendingLogo = c.logo||'';
+    pendingContacts = JSON.parse(JSON.stringify(c.contactos||[]));
+    if(!pendingContacts.length) pendingContacts = [blankContact()];
+    document.getElementById('cRazon').value = c.razonSocial||'';
+    document.getElementById('cCuit').value = c.cuit||'';
+    document.getElementById('cCondIva').value = c.condIva||'';
+    document.getElementById('cDomFiscal').value = c.domicilioFiscal||'';
+    document.getElementById('cEmailFact').value = c.emailFactura||'';
+    document.getElementById('cMonto').value = c.monto||'';
+    document.getElementById('cPeriodicidad').value = c.periodicidad||'mensual';
+    document.getElementById('cFrecuenciaCobro').value = c.frecuenciaCobro||'igual';
+    document.getElementById('cInicio').value = c.inicio||'';
+    document.getElementById('cVencimiento').value = c.vencimiento||'';
+    document.getElementById('cCostoRenovacion').value = c.costoRenovacion||'';
+    setRenovAuto(!!c.renovacionAutomatica);
+    document.getElementById('cEstado').value = c.estado||'prospecto';
+    (c.productos||[]).forEach(p=>{
+      const map={tactiq:'chipTactiq',manager:'chipManager',force:'chipForce'};
+      document.getElementById(map[p]).classList.add('on');
+      activeChips.add(p);
+    });
+  } else {
+    pendingBonifs = [];
+    pendingContacts = [blankContact()];
+    document.getElementById('cCondIva').value = '';
+    ['cClub','cLocalidad','cRazon','cCuit','cDomFiscal','cEmailFact','cMonto','cInicio','cVencimiento','cCostoRenovacion'].forEach(f=>document.getElementById(f).value='');
+    setRenovAuto(false);
+    pendingLogo = '';
+    document.getElementById('cPeriodicidad').value='mensual';
+    document.getElementById('cFrecuenciaCobro').value='igual';
+    document.getElementById('cEstado').value='prospecto';
+    document.getElementById('cInicio').value = new Date().toISOString().slice(0,10);
+  }
+  renderLogoPreview();
+  renderPendingBonifs();
+  renderPendingContacts();
+  updateCuitHint();
+  updateCuotaPreview();
+  openModal('mClient');
+}
+function calcularVencimiento(){
+  const inicio = document.getElementById('cInicio').value;
+  if(!inicio){ showToast('⚠ Ingresá primero la fecha de inicio'); return; }
+  const per = document.getElementById('cPeriodicidad').value;
+  const months = { mensual:1, trimestral:3, semestral:6, anual:12 }[per] || 1;
+  const d = new Date(inicio+'T00:00:00');
+  d.setMonth(d.getMonth()+months);
+  document.getElementById('cVencimiento').value = d.toISOString().slice(0,10);
+}
+function saveClient(){
+  const club = document.getElementById('cClub').value.trim();
+  if(!club){ showToast('⚠ Ingresá el nombre del club'); return; }
+  const id = document.getElementById('cId').value;
+  const contactos = pendingContacts.map(x=>({id:x.id, nombre:x.nombre.trim(), cargo:x.cargo.trim(), tel:x.tel.trim(), email:x.email.trim()}))
+    .filter(x=>x.nombre||x.cargo||x.tel||x.email);
+  const principal = contactos[0] || {nombre:'', tel:'', email:''};
+  const data = {
+    club,
+    localidad: document.getElementById('cLocalidad').value.trim(),
+    logo: pendingLogo||'',
+    contactos,
+    contactoNombre: principal.nombre,
+    contactoTel: principal.tel,
+    contactoEmail: principal.email,
+    razonSocial: document.getElementById('cRazon').value.trim(),
+    cuit: formatCuit(document.getElementById('cCuit').value),
+    condIva: document.getElementById('cCondIva').value,
+    domicilioFiscal: document.getElementById('cDomFiscal').value.trim(),
+    emailFactura: document.getElementById('cEmailFact').value.trim(),
+    productos: Array.from(activeChips),
+    monto: document.getElementById('cMonto').value,
+    periodicidad: document.getElementById('cPeriodicidad').value,
+    frecuenciaCobro: document.getElementById('cFrecuenciaCobro').value,
+    inicio: document.getElementById('cInicio').value,
+    vencimiento: document.getElementById('cVencimiento').value,
+    costoRenovacion: document.getElementById('cCostoRenovacion').value,
+    renovacionAutomatica: pendingRenovAuto,
+    estado: document.getElementById('cEstado').value,
+    bonificaciones: JSON.parse(JSON.stringify(pendingBonifs)),
+  };
+  if(id){
+    const c = state.clients.find(x=>x.id===id);
+    Object.assign(c, data);
+  } else {
+    state.clients.push(ensureClientShape({ id: uid(), ...data, creado: Date.now() }));
+  }
+  persistClients();
+  closeModal('mClient');
+  renderAll();
+  showToast('✅ Cliente guardado');
+}
+function deleteClient(id){
+  const c = state.clients.find(x=>x.id===id); if(!c) return;
+  if(!confirm(`¿Eliminar "${c.club}"? Esta acción no se puede deshacer.`)) return;
+  state.clients = state.clients.filter(x=>x.id!==id);
+  persistClients();
+  closeModal('mDetail');
+  renderAll();
+  showToast('Cliente eliminado');
+}
+
+/* ================================================================
+   MODAL DETALLE — bitácora de seguimiento + pagos
+================================================================ */
+function openDetailModal(id){
+  window._detailClientId = id;
+  const c = state.clients.find(x=>x.id===id); if(!c) return;
+  ensureClientShape(c);
+  document.getElementById('mDetailTitle').textContent = c.club;
+  document.getElementById('mDetailSub').textContent = [ESTADO_LABEL[c.estado], c.localidad, c.contactoNombre].filter(Boolean).join(' · ');
+  document.getElementById('mDetailLogo').innerHTML = c.logo?`<img src="${c.logo}" style="width:100%;height:100%;object-fit:contain">`:`<i class="fa-solid fa-building" style="color:var(--ink3);font-size:14px"></i>`;
+  setDetailTab('log');
+  document.getElementById('logText').value='';
+  document.getElementById('logNext').value='';
+  document.getElementById('payDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('payAmount').value = c.monto||'';
+  document.getElementById('payNote').value='';
+  renderCreds();
+  renderBonifs();
+  renderContactos();
+  renderFactCard();
+  renderLogList();
+  renderPayList();
+  updatePagoButtonLabel(c);
+  openModal('mDetail');
+}
+function updatePagoButtonLabel(c){
+  const el = document.getElementById('btnMarcarPagoLabel');
+  if(!el) return;
+  const montoTotal = Number(c.monto)||0;
+  if(!montoTotal){ el.textContent = 'Marcar pago de este período (actualiza vencimiento)'; return; }
+  const {installments, cuota} = calcCuotas(montoTotal, c.periodicidad, c.frecuenciaCobro);
+  if(installments<=1){
+    el.textContent = 'Marcar pago de este período (actualiza vencimiento)';
+  } else {
+    const nro = (c.cuotasPagadas||0)+1;
+    el.textContent = `Marcar cuota ${nro}/${installments} (${fmtMoney(cuotaMonto(c,nro))})`;
+  }
+}
+function setDetailTab(tab){
+  [['log','Log'],['pay','Pay'],['contactos','Contactos'],['bonif','Bonif'],['cred','Cred']].forEach(([k,n])=>{
+    document.getElementById('dtTab'+n).classList.toggle('active', tab===k);
+    document.getElementById('dtPanel'+n).classList.toggle('active', tab===k);
+  });
+}
+/* ================================================================
+   RESPALDO Y EXCEL
+================================================================ */
+const LS_BK = 'tactiqcrm_last_backup';
+function descargarArchivo(nombre, contenido, mime){
+  const blob = new Blob([contenido], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+function hoyISO(){ const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function openBackupModal(){ renderBackupInfo(); openModal('mBackup'); }
+function renderBackupInfo(){
+  const last = localStorage.getItem(LS_BK);
+  const el = document.getElementById('bkLast'); if(!el) return;
+  el.textContent = last ? `Último respaldo: ${new Date(last).toLocaleString('es-AR')}` : 'Todavía no hiciste ningún respaldo.';
+}
+function descargarRespaldo(){
+  const data = { app:'TactiqCRM', version:1, exportado:new Date().toISOString(), clients: state.clients };
+  descargarArchivo(`TactiqCRM_respaldo_${hoyISO()}.json`, JSON.stringify(data,null,1), 'application/json');
+  localStorage.setItem(LS_BK, new Date().toISOString());
+  renderBackupInfo(); renderBackupBanner();
+  showToast('✅ Respaldo descargado');
+}
+function restaurarRespaldo(ev){
+  const file = ev.target.files && ev.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      const arr = Array.isArray(data) ? data : data.clients;
+      if(!Array.isArray(arr) || !arr.every(c=>c && typeof c==='object' && c.id && typeof c.club==='string')) throw new Error('formato');
+      if(!confirm(`Se van a reemplazar los ${state.clients.length} cliente(s) de este navegador por los ${arr.length} del archivo. ¿Continuar?`)){ ev.target.value=''; return; }
+      try{ localStorage.setItem('tactiqcrm_before_restore', JSON.stringify(state.clients)); }catch(_){}
+      state.clients = arr.map(ensureClientShape);
+      persistClients();
+      renderAll();
+      closeModal('mBackup');
+      showToast(`✅ Restaurados ${arr.length} cliente(s)`);
+    }catch(err){
+      showToast('⚠ Ese archivo no es un respaldo válido de TactiqCRM');
+    }
+    ev.target.value='';
+  };
+  reader.readAsText(file);
+}
+function renderBackupBanner(){
+  const el = document.getElementById('backupBanner'); if(!el) return;
+  if(!state.clients.length){ el.innerHTML=''; return; }
+  const last = localStorage.getItem(LS_BK);
+  const dias = last ? Math.floor((Date.now()-new Date(last).getTime())/86400000) : null;
+  if(last && dias<7){ el.innerHTML=''; return; }
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fffaf3;border:1px solid #f0d4b8;border-radius:var(--r);padding:12px 16px;margin-bottom:20px;font-size:12.5px;color:#7a4a1c">
+    <span style="flex:1"><b>Respaldo:</b> ${last ? `hace ${dias} días que no descargás uno.` : 'todavía no descargaste ninguno.'} Tus datos están solo en este navegador.</span>
+    <button class="btn btn-p btn-xs" onclick="descargarRespaldo()">⬇ Descargar ahora</button>
+  </div>`;
+}
+/* ---- Excel (SpreadsheetML: Excel lo abre directo, sin librerías) ---- */
+function xmlEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function xlCell(v, tipo){
+  if(v===null || v===undefined || v==='') return '<Cell/>';
+  if(tipo==='n'){ const n=Number(v); if(isFinite(n)) return `<Cell ss:StyleID="m"><Data ss:Type="Number">${n}</Data></Cell>`; }
+  if(tipo==='d'){ const d=String(v).slice(0,10); if(/^\d{4}-\d{2}-\d{2}$/.test(d)) return `<Cell ss:StyleID="d"><Data ss:Type="DateTime">${d}T00:00:00.000</Data></Cell>`; }
+  if(tipo==='h') return `<Cell ss:StyleID="h"><Data ss:Type="String">${xmlEsc(v)}</Data></Cell>`;
+  return `<Cell><Data ss:Type="String">${xmlEsc(v)}</Data></Cell>`;
+}
+function xlSheet(nombre, cols, filas){
+  // cols: [{t:'Título', k:'s'|'n'|'d', w:ancho}]
+  const head = `<Row>${cols.map(c=>xlCell(c.t,'h')).join('')}</Row>`;
+  const body = filas.map(f=>`<Row>${cols.map((c,i)=>xlCell(f[i], c.k)).join('')}</Row>`).join('');
+  return `<Worksheet ss:Name="${xmlEsc(nombre)}"><Table>${cols.map(c=>`<Column ss:Width="${c.w||110}"/>`).join('')}${head}${body}</Table></Worksheet>`;
+}
+function isoDeFecha(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function buildExcelXml(){
+  const clients = state.clients.map(c=>ensureClientShape(c));
+  const prod = {tactiq:'Tactiq', manager:'TactiqManager', force:'TactiqForce'};
+  const bonifTxt = c=>(c.bonificaciones||[]).filter(b=>b.pct>0).map(b=>`meses ${b.desde}-${b.hasta}: ${b.pct}%${b.repetir?' (cada año)':''}`).join(' | ');
+  const hojaClientes = xlSheet('Clientes', [
+    {t:'Club',w:170},{t:'Localidad'},{t:'Estado'},{t:'Productos',w:150},{t:'Contacto principal',w:140},{t:'Teléfono'},{t:'Email',w:160},
+    {t:'Monto',k:'n'},{t:'Periodicidad'},{t:'Frecuencia de cobro'},{t:'Inicio',k:'d'},{t:'Vencimiento',k:'d'},{t:'Renovación automática'},
+    {t:'Período actual',k:'n'},{t:'Cuotas pagadas',k:'n'},{t:'Bonificaciones',w:170},
+    {t:'Razón social',w:170},{t:'CUIT'},{t:'Condición IVA'},{t:'Domicilio fiscal',w:170},{t:'Email factura',w:160}
+  ].map(x=>x.k==='n' && (x.t==='Período actual'||x.t==='Cuotas pagadas') ? Object.assign({},x,{k:'s'}) : x),
+  clients.map(c=>[c.club,c.localidad,ESTADO_LABEL[c.estado]||c.estado,(c.productos||[]).map(x=>prod[x]||x).join(', '),c.contactoNombre,c.contactoTel,c.contactoEmail,
+    c.monto,c.periodicidad,c.frecuenciaCobro==='igual'?'Pago único':c.frecuenciaCobro,c.inicio,c.vencimiento,c.renovacionAutomatica?'Sí':'No',
+    c.periodoActual,c.cuotasPagadas,bonifTxt(c),c.razonSocial,c.cuit,c.condIva,c.domicilioFiscal,c.emailFactura]));
+  const pagosFilas = [];
+  clients.forEach(c=>(c.payments||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(p=>pagosFilas.push([c.club,p.date,p.amount,p.note,p.factura,p.cuota,p.periodo])));
+  const hojaPagos = xlSheet('Pagos',[{t:'Club',w:170},{t:'Fecha',k:'d'},{t:'Monto',k:'n'},{t:'Nota',w:220},{t:'Nº factura',w:130},{t:'Cuota'},{t:'Período'}],pagosFilas);
+  const contFilas = [];
+  clients.forEach(c=>(c.contactos||[]).forEach((x,i)=>contFilas.push([c.club,x.nombre,x.cargo,x.tel,x.email,i===0?'Sí':''])));
+  const hojaContactos = xlSheet('Contactos',[{t:'Club',w:170},{t:'Nombre',w:150},{t:'Cargo'},{t:'Teléfono'},{t:'Email',w:170},{t:'Principal'}],contFilas);
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const desde = new Date(hoy.getFullYear(), hoy.getMonth()-3, 1), hasta = new Date(hoy.getFullYear(), hoy.getMonth()+7, 1);
+  const cuotasFilas = [];
+  clients.filter(c=>COB_ESTADOS.includes(c.estado)).forEach(c=>cobrosCliente(c).filter(x=>x.due>=desde && x.due<hasta).forEach(x=>{
+    cuotasFilas.push([c.club, x.total>1 ? `${x.nro}/${x.total}` : 'Pago del período', isoDeFecha(x.due), Math.round(x.monto*100)/100,
+      x.pagada?'Pagada':(x.due<hoy?'Atrasada':'Pendiente'), x.monto < x.base-0.005 ? 'Sí' : '']);
+  }));
+  cuotasFilas.sort((a,b)=>String(a[2]).localeCompare(String(b[2])) || String(a[0]).localeCompare(String(b[0])));
+  const hojaCuotas = xlSheet('Cuotas',[{t:'Club',w:170},{t:'Cuota'},{t:'Vence',k:'d'},{t:'Monto',k:'n'},{t:'Estado'},{t:'Con bonificación'}],cuotasFilas);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Styles>
+<Style ss:ID="h"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#0F7D5C" ss:Pattern="Solid"/></Style>
+<Style ss:ID="d"><NumberFormat ss:Format="dd/mm/yyyy"/></Style>
+<Style ss:ID="m"><NumberFormat ss:Format="&quot;$&quot;#,##0.00"/></Style>
+</Styles>
+${hojaClientes}${hojaPagos}${hojaContactos}${hojaCuotas}
+</Workbook>`;
+}
+function exportarExcel(){
+  if(!state.clients.length){ showToast('⚠ Todavía no hay clientes para exportar'); return; }
+  descargarArchivo(`TactiqCRM_${hoyISO()}.xls`, buildExcelXml(), 'application/vnd.ms-excel');
+  showToast('✅ Excel descargado');
+}
+
+/* ================================================================
+   ENVIAR INFORMACIÓN A UN CLUB (WhatsApp / Email / copiar)
+================================================================ */
+const LS_COBRO = 'tactiqcrm_datos_cobro';
+const APP_LINKS = {
+  tactiq:  {label:'Tactiq',        url:'https://tactiq.com.ar/Tactiq.html'},
+  manager: {label:'TactiqManager', url:'https://tactiqmanager.web.app'},
+  force:   {label:'TactiqForce',   url:'https://tactiqforce.vercel.app/PreparadorFisico.html'},
+};
+let msgOpts = {links:true, cred:true, cuota:false, cobro:false};
+let msgClientId = null;
+function openMensajeModal(id){
+  const c = state.clients.find(x=>x.id===id); if(!c) return;
+  ensureClientShape(c);
+  msgClientId = id;
+  msgOpts = {links:true, cred:true, cuota:false, cobro:false};
+  document.getElementById('msgTitulo').textContent = `Enviar información a ${c.club}`;
+  const sel = document.getElementById('msgDest');
+  sel.innerHTML = c.contactos.length
+    ? c.contactos.map(x=>`<option value="${x.id}">${esc(x.nombre||'Sin nombre')}${x.cargo?' ('+esc(x.cargo)+')':''}${x.tel?' — '+esc(x.tel):' — sin teléfono'}</option>`).join('')
+    : `<option value="">Este club no tiene contactos cargados</option>`;
+  document.getElementById('msgCobro').value = localStorage.getItem(LS_COBRO) || '';
+  ['links','cred','cuota','cobro'].forEach(k=>document.getElementById('msgChip_'+k).classList.toggle('on', !!msgOpts[k]));
+  armarMensaje();
+  openModal('mMensaje');
+}
+function toggleMsgOpt(k){
+  msgOpts[k] = !msgOpts[k];
+  document.getElementById('msgChip_'+k).classList.toggle('on', msgOpts[k]);
+  armarMensaje();
+}
+function guardarDatosCobro(){ localStorage.setItem(LS_COBRO, document.getElementById('msgCobro').value); }
+function armarMensaje(){
+  const c = state.clients.find(x=>x.id===msgClientId); if(!c) return;
+  ensureClientShape(c);
+  const dest = c.contactos.find(x=>x.id===document.getElementById('msgDest').value) || c.contactos[0];
+  const nombre = dest && dest.nombre ? dest.nombre.trim().split(' ')[0] : '';
+  const avisos = [];
+  const partes = [`Hola${nombre?' '+nombre:''}! Te paso la información de ${c.club}.`];
+  const prods = (c.productos && c.productos.length ? c.productos : ['tactiq','manager','force']).filter(k=>APP_LINKS[k]);
+
+  if(msgOpts.links){
+    partes.push('*Links de ingreso*\n' + prods.map(k=>`• ${APP_LINKS[k].label}: ${APP_LINKS[k].url}`).join('\n'));
+  }
+  if(msgOpts.cred){
+    const bloques = [];
+    const cr = c.credenciales;
+    if(cr.tactiq.some(r=>r.user||r.pass))   bloques.push('Tactiq\n' + cr.tactiq.filter(r=>r.user||r.pass).map(r=>`• Usuario: ${r.user} · Contraseña: ${r.pass}${r.note?' ('+r.note+')':''}`).join('\n'));
+    if(cr.manager.some(r=>r.user||r.pass))  bloques.push('TactiqManager\n' + cr.manager.filter(r=>r.user||r.pass).map(r=>`• Usuario: ${r.user} · Contraseña: ${r.pass}${r.note?' ('+r.note+')':''}`).join('\n'));
+    if(cr.force.some(r=>r.code))            bloques.push('TactiqForce\n' + cr.force.filter(r=>r.code).map(r=>`• Código de club: ${r.code}${r.note?' ('+r.note+')':''}`).join('\n'));
+    if(bloques.length) partes.push('*Credenciales*\n' + bloques.join('\n\n'));
+    else avisos.push('Este club no tiene credenciales cargadas (pestaña 🔑 Credenciales).');
+  }
+  if(msgOpts.cuota){
+    const prox = cobrosCliente(c).find(x=>x.esProxima);
+    if(prox) partes.push(`*Próxima cuota*\n${prox.total>1?`Cuota ${prox.nro}/${prox.total}`:'Pago de la membresía'}: ${fmtMoney(Math.round(prox.monto*100)/100)}${prox.monto<prox.base-0.005?' (incluye tu bonificación)':''} — vence el ${prox.due.toLocaleDateString('es-AR')}.`);
+    else avisos.push('No pude calcular la próxima cuota: revisá que el cliente tenga monto y fecha de inicio.');
+  }
+  if(msgOpts.cobro){
+    const t = document.getElementById('msgCobro').value.trim();
+    if(t) partes.push('*Datos para abonar*\n' + t);
+    else avisos.push('Escribí tus datos para abonar en el recuadro de arriba.');
+  }
+  if(msgOpts.cred && prods.length) partes.push('Cualquier duda, escribime. ¡Gracias!');
+  else partes.push('Cualquier duda, escribime. ¡Gracias!');
+  document.getElementById('msgTexto').value = partes.join('\n\n');
+  const av = document.getElementById('msgAviso');
+  av.innerHTML = avisos.map(a=>'⚠ '+esc(a)).join('<br>') + (msgOpts.cred ? `${avisos.length?'<br>':''}<span style="color:var(--ink3)">Ojo: las contraseñas viajan en el mensaje. Conviene que el club las cambie al ingresar.</span>` : '');
+}
+function destActual(){
+  const c = state.clients.find(x=>x.id===msgClientId); if(!c) return null;
+  return c.contactos.find(x=>x.id===document.getElementById('msgDest').value) || c.contactos[0] || null;
+}
+function copiarMensaje(){
+  const t = document.getElementById('msgTexto').value;
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(()=>showToast('✅ Mensaje copiado')).catch(()=>window.prompt('Copiá el mensaje:', t)); }
+  else window.prompt('Copiá el mensaje:', t);
+}
+function enviarMensajeWhatsApp(){
+  const d = destActual();
+  const link = d ? waLinkFromTel(d.tel, document.getElementById('msgTexto').value) : null;
+  if(!link){ showToast('⚠ Ese contacto no tiene teléfono. Agregalo en ✏ Editar datos del cliente'); return; }
+  window.open(link, '_blank');
+}
+function enviarMensajeEmail(){
+  const d = destActual();
+  if(!d || !d.email){ showToast('⚠ Ese contacto no tiene email. Agregalo en ✏ Editar datos del cliente'); return; }
+  const c = state.clients.find(x=>x.id===msgClientId);
+  window.location.href = `mailto:${encodeURIComponent(d.email).replace('%40','@')}?subject=${encodeURIComponent('Información de '+(c?c.club:'Tactiq'))}&body=${encodeURIComponent(document.getElementById('msgTexto').value)}`;
+}
+
+/* ---- Facturación ---- */
+function cuitValido(v){
+  const d = String(v||'').replace(/\D/g,''); if(d.length!==11) return false;
+  const w = [5,4,3,2,7,6,5,4,3,2]; let sum = 0;
+  for(let i=0;i<10;i++) sum += Number(d[i])*w[i];
+  let dv = 11-(sum%11); if(dv===11) dv=0; else if(dv===10) dv=9;
+  return dv===Number(d[10]);
+}
+function formatCuit(v){
+  const d = String(v||'').replace(/\D/g,'');
+  return d.length===11 ? `${d.slice(0,2)}-${d.slice(2,10)}-${d.slice(10)}` : String(v||'').trim();
+}
+function updateCuitHint(){
+  const el = document.getElementById('cCuitHint'); if(!el) return;
+  const v = document.getElementById('cCuit').value.trim();
+  if(!v){ el.textContent=''; return; }
+  const ok = cuitValido(v);
+  el.textContent = ok ? '✔ CUIT válido' : '⚠ El CUIT no parece válido (revisá los 11 dígitos)';
+  el.style.color = ok ? 'var(--accent-ink)' : '#c1611c';
+}
+function textoDatosFactura(c){
+  return [
+    c.razonSocial ? `Razón social: ${c.razonSocial}` : '',
+    c.cuit ? `CUIT: ${c.cuit}` : '',
+    c.condIva ? `Condición frente al IVA: ${c.condIva}` : '',
+    c.domicilioFiscal ? `Domicilio fiscal: ${c.domicilioFiscal}` : '',
+    c.emailFactura ? `Email: ${c.emailFactura}` : '',
+  ].filter(Boolean).join('\n');
+}
+function renderFactCard(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const el = document.getElementById('dtFactCard'); if(!el) return;
+  const txt = textoDatosFactura(c);
+  if(!txt){
+    el.innerHTML = `<div style="font-size:11.5px;color:var(--ink3);margin-bottom:14px">Todavía no cargaste los datos para facturar de este club. Cargalos con <b>✏ Editar datos del cliente</b>.</div>`;
+    return;
+  }
+  const cuitMal = c.cuit && !cuitValido(c.cuit);
+  el.innerHTML = `<div style="border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;background:var(--bg)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <b style="font-size:12.5px">🧾 Datos para facturar</b>
+      <button class="btn btn-s btn-xs" onclick="copiarDatosFactura()"><i class="fa-regular fa-copy"></i> Copiar datos</button>
+    </div>
+    <div style="font-size:12.5px;line-height:1.7;color:var(--ink2)">${esc(txt).replace(/\n/g,'<br>')}</div>
+    ${cuitMal ? `<div style="font-size:11px;color:#c1611c;margin-top:6px">⚠ El CUIT cargado no parece válido. Revisalo antes de facturar.</div>` : ''}
+  </div>`;
+}
+function copiarDatosFactura(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const txt = textoDatosFactura(c);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>showToast('✅ Datos copiados')).catch(()=>{ window.prompt('Copiá los datos:', txt); });
+  } else { window.prompt('Copiá los datos:', txt); }
+}
+function editFactura(payId){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const p = (c.payments||[]).find(x=>x.id===payId); if(!p) return;
+  const v = window.prompt('Número de factura (dejalo vacío para quitarlo):', p.factura||'');
+  if(v===null) return;
+  p.factura = v.trim();
+  persistClients();
+  renderPayList();
+  renderAll();
+}
+
+/* ---- Contactos: varios por club (el primero es el principal y alimenta contactoNombre/Tel/Email) ---- */
+function normalizeContactos(c){
+  const raw = c.contactos;
+  const arr = Array.isArray(raw) ? raw.filter(Boolean) : (raw && typeof raw==='object' ? Object.values(raw).filter(Boolean) : []);
+  let out = arr.map(x=>({id:x.id||uid(), nombre:String(x.nombre||''), cargo:String(x.cargo||''), tel:String(x.tel||''), email:String(x.email||'')}));
+  // Cliente de antes (un solo contacto): se pasa a la lista sin perder nada
+  if(!out.length && (c.contactoNombre||c.contactoTel||c.contactoEmail)){
+    out = [{id:uid(), nombre:String(c.contactoNombre||''), cargo:'', tel:String(c.contactoTel||''), email:String(c.contactoEmail||'')}];
+  }
+  c.contactos = out;
+}
+function blankContact(){ return {id:uid(), nombre:'', cargo:'', tel:'', email:''}; }
+let pendingContacts = [];
+function renderPendingContacts(){
+  const box = document.getElementById('cContactRows'); if(!box) return;
+  box.innerHTML = pendingContacts.map((x,i)=>`
+    <div class="cred-row" style="border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;background:var(--bg)">
+      ${pendingContacts.length>1 ? `<button class="log-del" type="button" title="Quitar" onclick="removePendingContact('${x.id}')">🗑</button>` : ''}
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:${i===0?'var(--accent-ink)':'var(--ink3)'}">${i===0?'Contacto principal':'Contacto '+(i+1)}${i>0?` <a href="javascript:void(0)" onclick="makePrincipalContact('${x.id}')" style="margin-left:8px;font-weight:700;color:var(--accent-ink)">Hacer principal</a>`:''}</div>
+      <div class="form-grid">
+        <div class="field" style="margin-bottom:0"><label>Nombre</label><input value="${esc(x.nombre)}" placeholder="Ej: Juan Pérez" oninput="updatePendingContact('${x.id}','nombre',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>Cargo / rol</label><input value="${esc(x.cargo)}" placeholder="Ej: Presidente, Tesorero" oninput="updatePendingContact('${x.id}','cargo',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>Teléfono</label><input value="${esc(x.tel)}" placeholder="Ej: 3496 466738" oninput="updatePendingContact('${x.id}','tel',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>Email</label><input type="email" value="${esc(x.email)}" placeholder="contacto@club.com" oninput="updatePendingContact('${x.id}','email',this.value)"></div>
+      </div>
+    </div>`).join('');
+}
+function addPendingContact(){
+  pendingContacts.push(blankContact());
+  renderPendingContacts();
+  const rows = document.querySelectorAll('#cContactRows .cred-row');
+  const last = rows[rows.length-1];
+  if(last){ const inp = last.querySelector('input'); if(inp) inp.focus(); }
+}
+function updatePendingContact(id, field, val){
+  const x = pendingContacts.find(y=>y.id===id); if(x) x[field] = val;
+}
+function removePendingContact(id){
+  pendingContacts = pendingContacts.filter(y=>y.id!==id);
+  if(!pendingContacts.length) pendingContacts = [blankContact()];
+  renderPendingContacts();
+}
+function makePrincipalContact(id){
+  const i = pendingContacts.findIndex(y=>y.id===id); if(i<1) return;
+  const [x] = pendingContacts.splice(i,1);
+  pendingContacts.unshift(x);
+  renderPendingContacts();
+}
+function renderContactos(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const el = document.getElementById('dtContactList'); if(!el) return;
+  if(!c.contactos.length){
+    el.innerHTML = `<div class="empty-state">Este club todavía no tiene contactos cargados</div>`;
+    return;
+  }
+  el.innerHTML = c.contactos.map((x,i)=>{
+    const wa = waLinkFromTel(x.tel, `Hola${x.nombre?' '+x.nombre.split(' ')[0]:''}! Te escribo de Tactiq.`);
+    const telDig = (x.tel||'').replace(/\D/g,'');
+    return `<div style="border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <b style="font-size:13.5px">${esc(x.nombre||'Sin nombre')}</b>
+        ${x.cargo?`<span style="font-size:10.5px;font-weight:700;color:var(--ink3);background:var(--bg-panel);border:1px solid var(--line);padding:2px 8px;border-radius:20px">${esc(x.cargo)}</span>`:''}
+        ${i===0?`<span style="font-size:10px;font-weight:800;color:var(--accent-ink);background:var(--accent-soft);padding:2px 8px;border-radius:20px">PRINCIPAL</span>`:''}
+      </div>
+      <div style="font-size:12.5px;color:var(--ink2);margin-bottom:10px">${x.tel?esc(x.tel):'<span style="color:var(--ink3)">Sin teléfono</span>'}${x.email?' · '+esc(x.email):''}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${wa?`<a href="${wa}" target="_blank" class="btn btn-p btn-xs" style="background:#25D366;text-decoration:none"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`:''}
+        ${telDig?`<a href="tel:+${telDig.startsWith('54')?telDig:'54'+telDig}" class="btn btn-s btn-xs" style="text-decoration:none"><i class="fa-solid fa-phone"></i> Llamar</a>`:''}
+        ${x.email?`<a href="mailto:${esc(x.email)}" class="btn btn-s btn-xs" style="text-decoration:none"><i class="fa-regular fa-envelope"></i> Email</a>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---- Bonificaciones: descuento % por rango de meses ---- */
+function normalizeBonificaciones(c){
+  const raw = c.bonificaciones;
+  const arr = Array.isArray(raw) ? raw.filter(Boolean) : (raw && typeof raw==='object' ? Object.values(raw).filter(Boolean) : []);
+  c.bonificaciones = arr.map(b=>({
+    id: b.id||uid(),
+    desde: Math.max(1, Number(b.desde)||1),
+    hasta: Math.max(1, Number(b.hasta)||Number(b.desde)||1),
+    pct: Math.min(100, Math.max(0, Number(b.pct)||0)),
+    repetir: b.repetir===true,
+    nota: String(b.nota||'')
+  }));
+}
+// % de bonificación que tiene un mes de la membresía (mes 1 = primer mes). Si se pisan dos, vale la mayor.
+function bonifPctMes(c, mesAbs){
+  let best = 0;
+  (c.bonificaciones||[]).forEach(b=>{
+    const d = Number(b.desde)||1;
+    const h = Math.max(d, Number(b.hasta)||d);
+    const m = b.repetir ? ((mesAbs-1)%12)+1 : mesAbs;
+    if(m>=d && m<=h && (Number(b.pct)||0)>best) best = Number(b.pct);
+  });
+  return Math.min(100, best);
+}
+// Monto de la cuota nro (1..cantidad de cuotas) del período actual, ya con bonificaciones.
+function cuotaMonto(c, nro){
+  const monto = Number(c.monto)||0;
+  const perMonths = {mensual:1, trimestral:3, semestral:6, anual:12}[c.periodicidad] || 1;
+  const {installments} = calcCuotas(monto, c.periodicidad, c.frecuenciaCobro);
+  const frecMonths = Math.max(1, Math.round(perMonths/installments));
+  const base = monto/perMonths;
+  const mes0 = ((Number(c.periodoActual)||1)-1)*perMonths + (nro-1)*frecMonths;
+  let total = 0, hayDescuento = false;
+  for(let i=1;i<=frecMonths;i++){
+    const pct = bonifPctMes(c, mes0+i);
+    if(pct>0) hayDescuento = true;
+    total += base*(1-pct/100);
+  }
+  return hayDescuento ? Math.round(total*100)/100 : monto/installments;
+}
+function renderBonifs(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const per = document.getElementById('bonifPeriodo'); if(per) per.value = c.periodoActual;
+  const box = document.getElementById('bonifRows'); if(!box) return;
+  box.innerHTML = c.bonificaciones.length ? c.bonificaciones.map(b=>bonifRowHtml(b,'updateBonif','removeBonif')).join('')
+    : `<div style="font-size:11.5px;color:var(--ink3);margin-bottom:12px">Este cliente todavía no tiene bonificaciones.</div>`;
+  renderBonifPlan();
+}
+function renderBonifPlan(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const box = document.getElementById('bonifPlan'); if(!box) return;
+  const monto = Number(c.monto)||0;
+  if(!monto){ box.innerHTML = `<div class="empty-state">Cargá el monto de la membresía del cliente para ver el plan de cuotas</div>`; return; }
+  const perMonths = {mensual:1, trimestral:3, semestral:6, anual:12}[c.periodicidad] || 1;
+  const {installments} = calcCuotas(monto, c.periodicidad, c.frecuenciaCobro);
+  const frecMonths = Math.max(1, Math.round(perMonths/installments));
+  const pagadas = c.cuotasPagadas||0;
+  const periodo = Number(c.periodoActual)||1;
+  let total = 0;
+  const rows = [];
+  for(let nro=1; nro<=installments; nro++){
+    const pagoReal = (c.payments||[]).find(p=>p.periodo===periodo && p.cuota===nro);
+    const amt = (nro<=pagadas && pagoReal) ? Number(pagoReal.amount)||0 : cuotaMonto(c,nro);
+    total += amt;
+    const mes0 = (periodo-1)*perMonths + (nro-1)*frecMonths + 1;
+    const label = frecMonths===1 ? `Mes ${mes0}` : `Meses ${mes0}–${mes0+frecMonths-1}`;
+    const bonif = amt < monto/installments - 0.005;
+    const estado = nro<=pagadas ? '✔ Pagada' : (nro===pagadas+1 ? '→ Próxima' : 'Pendiente');
+    rows.push(`<div class="pay-item"><div><div class="pay-date">${label}</div><div class="pay-note">${estado}${bonif?' · con bonificación':''}</div></div><div class="pay-amt">${fmtMoney(amt)}</div></div>`);
+  }
+  box.innerHTML = `
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">Plan de cuotas del período ${periodo}</div>
+    ${rows.join('')}
+    <div style="font-size:11.5px;color:var(--ink3);margin-top:10px">Total del período: <b>${fmtMoney(total)}</b>${total < monto-0.005 ? ` (sin bonificaciones serían ${fmtMoney(monto)})` : ''}</div>`;
+}
+function setPeriodoActual(v){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const n = Math.max(1, Math.floor(Number(v)||1));
+  c.periodoActual = n;
+  persistClients();
+  renderBonifPlan();
+  updatePagoButtonLabel(c);
+}
+function addBonif(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  c.bonificaciones.push({id:uid(), desde:1, hasta:3, pct:0, repetir:false, nota:''});
+  persistClients();
+  renderBonifs();
+}
+function updateBonif(id, field, val){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const b = c.bonificaciones.find(x=>x.id===id); if(!b) return;
+  applyBonifField(b, field, val);
+  persistClients();
+  renderBonifPlan();
+  updatePagoButtonLabel(c);
+}
+function bonifRowHtml(b, updFn, delFn){
+  return `
+    <div class="cred-row" style="border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;background:var(--bg)">
+      <button class="log-del" type="button" title="Quitar" onclick="${delFn}('${b.id}')">🗑</button>
+      <div class="form-grid">
+        <div class="field" style="margin-bottom:0"><label>Desde el mes</label><input type="number" min="1" value="${b.desde}" oninput="${updFn}('${b.id}','desde',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>Hasta el mes</label><input type="number" min="1" value="${b.hasta}" oninput="${updFn}('${b.id}','hasta',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>% de bonificación</label><input type="number" min="0" max="100" value="${b.pct||''}" placeholder="Ej: 50" oninput="${updFn}('${b.id}','pct',this.value)"></div>
+        <div class="field" style="margin-bottom:0"><label>¿Se repite?</label>
+          <select onchange="${updFn}('${b.id}','repetir',this.value)">
+            <option value="0" ${b.repetir?'':'selected'}>No, solo esos meses</option>
+            <option value="1" ${b.repetir?'selected':''}>Sí, cada año</option>
+          </select></div>
+        <div class="field fg-full" style="margin-bottom:0"><label>Nota (opcional)</label><input value="${esc(b.nota)}" placeholder="Ej: Promo primeros 3 meses" oninput="${updFn}('${b.id}','nota',this.value)"></div>
+      </div>
+    </div>`;
+}
+function applyBonifField(b, field, val){
+  if(field==='desde' || field==='hasta') b[field] = Math.max(1, Math.floor(Number(val)||1));
+  else if(field==='pct') b.pct = Math.min(100, Math.max(0, Number(val)||0));
+  else if(field==='repetir') b.repetir = (val==='1');
+  else b.nota = String(val).trim();
+}
+/* Bonificaciones dentro del formulario Nuevo/Editar cliente (se guardan al apretar "Guardar") */
+let pendingBonifs = [];
+function renderPendingBonifs(){
+  const box = document.getElementById('cBonifRows'); if(!box) return;
+  box.innerHTML = pendingBonifs.map(b=>bonifRowHtml(b,'updatePendingBonif','removePendingBonif')).join('');
+  updateBonifPreview();
+}
+function addPendingBonif(){
+  pendingBonifs.push({id:uid(), desde:1, hasta:3, pct:0, repetir:false, nota:''});
+  renderPendingBonifs();
+}
+function updatePendingBonif(id, field, val){
+  const b = pendingBonifs.find(x=>x.id===id); if(!b) return;
+  applyBonifField(b, field, val);
+  updateBonifPreview();
+}
+function removePendingBonif(id){
+  pendingBonifs = pendingBonifs.filter(x=>x.id!==id);
+  renderPendingBonifs();
+}
+function updateBonifPreview(){
+  const el = document.getElementById('cBonifPreview'); if(!el) return;
+  const monto = Number(document.getElementById('cMonto').value)||0;
+  if(!monto || !pendingBonifs.some(b=>Number(b.pct)>0)){ el.textContent=''; return; }
+  const id = document.getElementById('cId').value;
+  const cc = id ? state.clients.find(x=>x.id===id) : null;
+  const tmp = {
+    monto,
+    periodicidad: document.getElementById('cPeriodicidad').value,
+    frecuenciaCobro: document.getElementById('cFrecuenciaCobro').value,
+    periodoActual: cc ? (Number(cc.periodoActual)||1) : 1,
+    bonificaciones: JSON.parse(JSON.stringify(pendingBonifs))
+  };
+  normalizeBonificaciones(tmp);
+  const {installments} = calcCuotas(monto, tmp.periodicidad, tmp.frecuenciaCobro);
+  let total = 0;
+  for(let n=1;n<=installments;n++) total += cuotaMonto(tmp,n);
+  if(total >= monto-0.005){ el.textContent=''; return; }
+  const primera = cuotaMonto(tmp,1);
+  el.textContent = `Con las bonificaciones: ${installments>1 ? 'cuota 1 de '+fmtMoney(primera)+' · ' : ''}total del período ${fmtMoney(Math.round(total*100)/100)} (ahorro ${fmtMoney(Math.round((monto-total)*100)/100)})`;
+}
+function removeBonif(id){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  if(!confirm('¿Quitar esta bonificación? Las cuotas que faltan van a volver a su monto normal.')) return;
+  c.bonificaciones = c.bonificaciones.filter(x=>x.id!==id);
+  persistClients();
+  renderBonifs();
+  updatePagoButtonLabel(c);
+}
+
+/* ---- Credenciales: varias por programa ---- */
+function normalizeCredenciales(c){
+  const cr = (c.credenciales && typeof c.credenciales==='object') ? c.credenciales : {};
+  const toArr = v => Array.isArray(v) ? v.filter(Boolean) : (v && typeof v==='object' ? Object.values(v).filter(Boolean) : []);
+  const up = r => ({ id:r.id||uid(), user:String(r.user||''), pass:String(r.pass||''), note:String(r.note||'') });
+  const cd = r => ({ id:r.id||uid(), code:String(r.code||''), note:String(r.note||'') });
+  const out = { tactiq: toArr(cr.tactiq).map(up), manager: toArr(cr.manager).map(up), force: toArr(cr.force).map(cd) };
+  // Datos viejos (un solo usuario por programa): se pasan a la lista sin perder nada
+  if(!out.tactiq.length && (cr.tactiqUser||cr.tactiqPass)) out.tactiq.push(up({user:cr.tactiqUser,pass:cr.tactiqPass}));
+  if(!out.manager.length && (cr.managerUser||cr.managerPass)) out.manager.push(up({user:cr.managerUser,pass:cr.managerPass}));
+  if(!out.force.length && cr.forceCode) out.force.push(cd({code:cr.forceCode}));
+  c.credenciales = out;
+}
+const CRED_DEFS = [
+  {key:'tactiq',  label:'Tactiq',        abbr:'TCQ', chip:'pc-tactiq',  code:false, add:'+ Agregar usuario'},
+  {key:'manager', label:'TactiqManager', abbr:'MGR', chip:'pc-manager', code:false, add:'+ Agregar usuario'},
+  {key:'force',   label:'TactiqForce',   abbr:'FRC', chip:'pc-force',   code:true,  add:'+ Agregar código de club'},
+];
+function renderCreds(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const box = document.getElementById('credBlocks'); if(!box) return;
+  box.innerHTML = CRED_DEFS.map(def=>{
+    const rows = c.credenciales[def.key];
+    const body = rows.length ? rows.map(r=>`
+      <div class="cred-row" style="border-top:1px solid var(--line);padding-top:10px;margin-top:10px">
+        <button class="log-del" title="Quitar" onclick="removeCred('${def.key}','${r.id}')">🗑</button>
+        <div class="form-grid">
+          ${def.code ? `
+          <div class="field" style="margin-bottom:0"><label>Código de club</label><input value="${esc(r.code)}" oninput="updateCred('${def.key}','${r.id}','code',this.value)" placeholder="Ej: DEMO01"></div>
+          <div class="field" style="margin-bottom:0"><label>Nota (opcional)</label><input value="${esc(r.note)}" oninput="updateCred('${def.key}','${r.id}','note',this.value)" placeholder="Ej: Hockey"></div>
+          ` : `
+          <div class="field" style="margin-bottom:0"><label>Usuario</label><input value="${esc(r.user)}" oninput="updateCred('${def.key}','${r.id}','user',this.value)" placeholder="usuario"></div>
+          <div class="field" style="margin-bottom:0"><label>Contraseña</label><input value="${esc(r.pass)}" oninput="updateCred('${def.key}','${r.id}','pass',this.value)" placeholder="contraseña"></div>
+          <div class="field fg-full" style="margin-bottom:0"><label>Nota (opcional)</label><input value="${esc(r.note)}" oninput="updateCred('${def.key}','${r.id}','note',this.value)" placeholder="Ej: Entrenador Primera"></div>
+          `}
+        </div>
+      </div>`).join('')
+      : `<div style="font-size:11.5px;color:var(--ink3);margin-bottom:4px">Todavía no cargaste ninguno.</div>`;
+    return `
+    <div class="cred-block" id="credBlock_${def.key}" style="border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;background:var(--bg)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="prod-chip ${def.chip}">${def.abbr}</span>
+        <b style="font-size:13px">${def.label}</b>
+      </div>
+      ${body}
+      ${def.code ? `<div style="font-size:10.5px;color:var(--ink3);margin-top:10px">TactiqForce no usa usuario/contraseña por club — los preparadores se suman con este código.</div>` : ''}
+      <button class="btn btn-s" style="margin-top:12px" onclick="addCred('${def.key}')">${def.add}</button>
+    </div>`;
+  }).join('');
+}
+function updateCred(key,id,field,val){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const r = c.credenciales[key].find(x=>x.id===id); if(!r) return;
+  r[field] = val.trim();
+  persistClients();
+}
+function addCred(key){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  c.credenciales[key].push(key==='force' ? {id:uid(),code:'',note:''} : {id:uid(),user:'',pass:'',note:''});
+  persistClients();
+  renderCreds();
+  const rows = document.querySelectorAll('#credBlock_'+key+' .cred-row');
+  const last = rows[rows.length-1];
+  if(last){ const inp = last.querySelector('input'); if(inp) inp.focus(); }
+}
+function removeCred(key,id){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  const r = c.credenciales[key].find(x=>x.id===id); if(!r) return;
+  if((r.user||r.pass||r.code) && !confirm('¿Quitar esta credencial?')) return;
+  c.credenciales[key] = c.credenciales[key].filter(x=>x.id!==id);
+  persistClients();
+  renderCreds();
+}
+function renderLogList(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const log = (c.interactions||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const el = document.getElementById('logList');
+  if(!log.length){ el.innerHTML = `<div class="empty-state">Todavía no hay ninguna entrada en la bitácora</div>`; return; }
+  el.innerHTML = log.map(l=>`
+    <div class="log-item">
+      <button class="log-del" onclick="deleteLogEntry('${l.id}')">🗑</button>
+      <div class="log-date">${fmtDate(l.date)}</div>
+      <div class="log-text">${esc(l.text)}</div>
+      ${l.next?`<div class="log-next">📅 Próximo contacto: ${fmtDate(l.next)}</div>`:''}
+    </div>`).join('');
+}
+function addLogEntry(){
+  const text = document.getElementById('logText').value.trim();
+  const next = document.getElementById('logNext').value;
+  if(!text){ showToast('⚠ Escribí algo sobre el contacto'); return; }
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  c.interactions.push({id:uid(), date:new Date().toISOString().slice(0,10), text, next: next||null});
+  persistClients();
+  document.getElementById('logText').value='';
+  document.getElementById('logNext').value='';
+  renderLogList();
+  renderAll();
+  showToast('✅ Agregado a la bitácora');
+}
+function deleteLogEntry(logId){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  c.interactions = (c.interactions||[]).filter(l=>l.id!==logId);
+  persistClients();
+  renderLogList();
+  renderAll();
+}
+function renderPayList(){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  const pays = (c.payments||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const total = pays.reduce((s,p)=>s+(Number(p.amount)||0),0);
+  document.getElementById('payTotal').textContent = pays.length ? `${pays.length} pago${pays.length!==1?'s':''} registrado${pays.length!==1?'s':''} — total ${fmtMoney(total)}` : '';
+  const el = document.getElementById('payList');
+  if(!pays.length){ el.innerHTML = `<div class="empty-state">Todavía no hay pagos registrados</div>`; return; }
+  el.innerHTML = pays.map(p=>`
+    <div class="pay-item">
+      <div>
+        <div class="pay-date">${fmtDate(p.date)}</div>
+        ${p.note?`<div class="pay-note">${esc(p.note)}</div>`:''}
+        ${p.factura?`<div class="pay-note">🧾 Factura ${esc(p.factura)}</div>`:`<div class="pay-note" style="color:#c1611c">Sin factura</div>`}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pay-amt">${fmtMoney(p.amount)}</div>
+        <button class="icon-btn" title="Cargar o cambiar el número de factura" onclick="editFactura('${p.id}')"><i class="fa-solid fa-file-invoice"></i></button>
+        <button class="icon-btn danger" onclick="deletePayment('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function addPayment(){
+  const date = document.getElementById('payDate').value;
+  const amount = document.getElementById('payAmount').value;
+  const note = document.getElementById('payNote').value.trim();
+  const factura = document.getElementById('payFactura').value.trim();
+  if(!date || !amount){ showToast('⚠ Ingresá fecha y monto'); return; }
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  ensureClientShape(c);
+  c.payments.push({id:uid(), date, amount, note, factura});
+  persistClients();
+  document.getElementById('payNote').value='';
+  document.getElementById('payFactura').value='';
+  renderPayList();
+  renderAll();
+  showToast('✅ Pago registrado');
+}
+function deletePayment(payId){
+  const c = state.clients.find(x=>x.id===window._detailClientId); if(!c) return;
+  c.payments = (c.payments||[]).filter(p=>p.id!==payId);
+  persistClients();
+  renderPayList();
+  renderAll();
+}
+
+/* ================================================================
+   HELPERS UI
+================================================================ */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display='block';
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>{ t.style.display='none'; }, 2600);
+}
+document.querySelectorAll('.modal-bg').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
